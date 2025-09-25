@@ -19,7 +19,7 @@
                     <li><a href="#">Acerca de</a></li>
                     <li><a href="#">Terminos &amp; Condiciones</a></li>
                     <li><a href="#">Politica de Privacidad</a></li>
-                    <li><a href="<?php echo RUTA_PRINCIPAL . 'views/admin/'; ?>index.php">Administrador</a></li>
+                    <li><a href="<?php echo RUTA_ADMIN; ?>">Administrador</a></li>
                 </ul>
             </div>
             <div class="col-md-3 mb-5">

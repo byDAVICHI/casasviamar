@@ -11,30 +11,34 @@ $ruta = empty($_GET['url']) ? 'principal/index' : $_GET['url'];
 // CREAR UN ARRAY A PARTIR DE LA RUTA
 $array = explode('/', $ruta);
 // VALIDAR SI NOS ENCONTRAMOS EN LA RUTA ADMIN
-if (
-    $isAdmin && (count($array) == 1
-        || (count($array) == 2 && empty($array[1])))
-    && $array[0] == ADMIN
-) {
-    // CREAR CONTROLADOR
+if ($isAdmin) {
+    // Para rutas de admin, siempre usar el controlador Admin
     $controller = 'Admin';
-    $metodo = 'login';
+    
+    // Si solo es 'admin' o 'admin/', usar método login
+    if (count($array) == 1 || (count($array) == 2 && empty($array[1]))) {
+        $metodo = 'login';
+    } else {
+        // Si hay más partes en la URL, la segunda parte es el método
+        $metodo = isset($array[1]) && !empty($array[1]) ? $array[1] : 'login';
+    }
 } else {
-    $indiceUrl = ($isAdmin) ? 1 : 0;
+    $indiceUrl = 0;
     $controller  = ucfirst($array[$indiceUrl]);
     $metodo = 'index';
 }
 
-// VALIDAR METODOS
-
-$metodoIndice = ($isAdmin) ? 2 : 1;
-if (!empty($array[$metodoIndice]) && $array[$metodoIndice] != '') {
-    $metodo = $array[$metodoIndice];
+// VALIDAR METODOS (solo para rutas no admin)
+if (!$isAdmin) {
+    $metodoIndice = 1;
+    if (!empty($array[$metodoIndice]) && $array[$metodoIndice] != '') {
+        $metodo = $array[$metodoIndice];
+    }
 }
 
 // VALIDAR PARAMETROS
 $parametro = '';
-$parametroIndice = ($isAdmin) ? 3 : 2;
+$parametroIndice = ($isAdmin) ? 2 : 2;
 if (!empty($array[$parametroIndice]) && $array[$parametroIndice] != '') {
     for ($i = $parametroIndice; $i < count($array); $i++) {
         $parametro .= $array[$i] . ',';
