@@ -111,11 +111,21 @@ function validarCampos($campos)
 // CREAR SESIONES
 function crearSession($datos)
 {
-    $_SESSION['id_usuario'] = $datos['id_usuario'];
-    $_SESSION['usuario'] = $datos['usuario'];
-    $_SESSION['correo_usuario'] = $datos['correo'];
-    $_SESSION['nombre_usuario'] = $datos['nombre'];
-    $_SESSION['rol'] = $datos['rol'];
+    // Verificar si es sesión de administrador
+    if (isset($datos['id_admin'])) {
+        $_SESSION['id_admin'] = $datos['id_admin'];
+        $_SESSION['usuario_admin'] = $datos['usuario_admin'];
+        $_SESSION['correo_admin'] = $datos['correo_admin'];
+        $_SESSION['nombre_admin'] = $datos['nombre_admin'];
+        $_SESSION['rol_admin'] = $datos['rol_admin'];
+    } else {
+        // Sesión de usuario normal
+        $_SESSION['id_usuario'] = $datos['id_usuario'];
+        $_SESSION['usuario'] = $datos['usuario'];
+        $_SESSION['correo_usuario'] = $datos['correo'];
+        $_SESSION['nombre_usuario'] = $datos['nombre'];
+        $_SESSION['rol'] = $datos['rol'];
+    }
 }
 // REDIRECT
 function redirect($ruta)
