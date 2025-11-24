@@ -1,0 +1,40 @@
+# ARCHIVOS DE DESARROLLO Y TESTING
+test_*.php
+debug_*.php
+check_*.php
+fix_*.php
+verificar_*.php
+
+# DEPENDENCIAS
+vendor/
+node_modules/
+
+# ARCHIVOS DE CONFIGURACIÓN LOCAL
+.env
+.env.local
+
+# ARCHIVOS DE SISTEMA
+.DS_Store
+Thumbs.db
+
+# LOGS
+*.log
+error_log
+
+# ARCHIVOS TEMPORALES
+*.tmp
+*.temp
+
+# BACKUPS
+*.bak
+*.backup
+
+# ARCHIVOS DE IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ARCHIVOS DE CACHE
+cache/
+*.cache

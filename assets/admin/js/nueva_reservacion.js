@@ -1,4 +1,26 @@
-const base_url = window.location.origin + '/casasviamar/admin/';
+// DETECCIÓN AUTOMÁTICA DE ENTORNO
+const base_url = (() => {
+    const hostname = window.location.hostname;
+    const pathname = window.location.pathname;
+    
+    // Detectar si estamos en producción
+    const isProduction = (
+        hostname === 'www.casasviamar.com' || 
+        hostname === 'casasviamar.com' ||
+        hostname.includes('hostinger')
+    );
+    
+    if (isProduction) {
+        // PRODUCCIÓN: https://www.casasviamar.com/admin/
+        return window.location.origin + '/admin/';
+    } else {
+        // DESARROLLO: http://localhost/casasviamar/admin/
+        return window.location.origin + '/casasviamar/admin/';
+    }
+})();
+
+console.log('🌍 Entorno detectado:', window.location.hostname.includes('casasviamar.com') ? 'PRODUCCIÓN' : 'DESARROLLO');
+console.log('🔗 Base URL configurada:', base_url);
 
 function alertSW(mensaje, tipo) {
     Swal.fire({

@@ -1,15 +1,36 @@
 <?php
+// DETECCIÓN AUTOMÁTICA DE ENTORNO
+$isProduction = (
+    isset($_SERVER['HTTP_HOST']) && 
+    (
+        $_SERVER['HTTP_HOST'] === 'www.casasviamar.com' || 
+        $_SERVER['HTTP_HOST'] === 'casasviamar.com' ||
+        strpos($_SERVER['HTTP_HOST'], 'hostinger') !== false
+    )
+);
+
+// CONFIGURACIÓN DINÁMICA POR ENTORNO
 define('ADMIN', 'admin');
-define('RUTA_PRINCIPAL', 'http://localhost/casasviamar/');
-// define('RUTA_PRINCIPAL', 'https://www.casasviamar.com/');
+
+if ($isProduction) {
+    // CONFIGURACIÓN DE PRODUCCIÓN
+    define('RUTA_PRINCIPAL', 'https://www.casasviamar.com/');
+    define('HOST', 'localhost');
+    define('USER', 'u204448082_root');
+    define('PASS', 'di1234YA');
+    define('DATABASE', 'u204448082_reservas');
+    define('ENVIRONMENT', 'production');
+} else {
+    // CONFIGURACIÓN DE DESARROLLO
+    define('RUTA_PRINCIPAL', 'http://localhost/casasviamar/');
+    define('HOST', 'localhost');
+    define('USER', 'root');
+    define('PASS', '');
+    define('DATABASE', 'reservas');
+    define('ENVIRONMENT', 'development');
+}
+
 define('RUTA_ADMIN', RUTA_PRINCIPAL . ADMIN . '/');
-define('HOST', 'localhost');
-define('USER', 'root');
-// define('USER', 'u204448082_root');
-define('PASS', '');
-// define('PASS', 'di1234YA');
-define('DATABASE', 'reservas');
-// define('DATABASE', 'u204448082_reservas');
 define('CHARSET', 'charset=utf8');
 define('TITLE', 'VIA-MAR');
 // CREDENCIALES PAYPAL
