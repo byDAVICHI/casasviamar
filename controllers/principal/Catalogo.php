@@ -1,29 +1,13 @@
 <?php
-class Principal extends Controller
+class Catalogo extends Controller
 {
     public function __construct()
     {
         parent::__construct();
     }
-    
+
+    // Vista principal del catálogo
     public function index()
-    {
-        $data['title'] = 'Pagina Principal';
-        // TRAER SLIDERS
-        $data['sliders'] = $this->model->getSliders();
-
-        // TRAER HABITACIONES (para el formulario de disponibilidad)
-        $data['habitaciones'] = $this->model->getHabitaciones();
-        
-        // TRAER PROPIEDADES PARA CATÁLOGO AIRBNB
-        $data['propiedades'] = $this->model->getCasasParaCatalogo();
-
-        $this->views->getView('index', $data);
-    }
-
-    // ==================== CATÁLOGO ESTILO AIRBNB ====================
-    
-    public function catalogo()
     {
         $data['title'] = 'Casas Vacacionales - Via-Mar';
         
@@ -35,7 +19,7 @@ class Principal extends Controller
             'capacidad_min' => isset($_GET['capacidad_min']) ? intval($_GET['capacidad_min']) : null,
         ];
         
-        // Obtener propiedades
+        // Obtener propiedades del catálogo
         $data['propiedades'] = $this->model->getCasasParaCatalogo($filtros);
         $data['filtros'] = $filtros;
         

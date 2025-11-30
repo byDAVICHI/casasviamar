@@ -8,7 +8,7 @@ include_once 'views/template/header-principal.php';
                 <figure class="img-absolute">
                     <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/logodefinitivo.png" alt="Free Website Template by Templateux" class="img-fluid">
                 </figure>
-                <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-2.jpg" alt="Image" class="img-fluid rounded">
+                <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-3.jpg" alt="Casa Vacacional Via-Mar" class="img-fluid rounded">
             </div>
             <div class="col-md-12 col-lg-4 order-lg-1" data-aos="fade-up">
                 <h2 class="heading">Bienvenido a casa en Tecolutla, Veracruz!</h2>

@@ -9,18 +9,18 @@ class Query extends Conexion
     }
 
     // RECUPERAR UN SOLO REGISTRO
-    public function select($sql)
+    public function select($sql, $params = [])
     {
         $result = $this->pdo->prepare($sql);
-        $result->execute();
+        $result->execute($params);
         return $result->fetch(PDO::FETCH_ASSOC);
     }
 
     // RECUPERAR TODOS LOS REGISTROS
-    public function selectAll($sql)
+    public function selectAll($sql, $params = [])
     {
         $result = $this->pdo->prepare($sql);
-        $result->execute();
+        $result->execute($params);
         return $result->fetchAll(PDO::FETCH_ASSOC);
     }
 

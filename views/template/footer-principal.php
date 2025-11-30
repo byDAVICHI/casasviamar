@@ -78,7 +78,7 @@
 <script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>js/bootstrap-datepicker.js"></script>
 <script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>js/jquery.timepicker.min.js"></script>
 
-<script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>assets/principal/js/pages/index.js"></script>
+<script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>js/pages/index.js"></script>
 
 <script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>js/main.js"></script>
 

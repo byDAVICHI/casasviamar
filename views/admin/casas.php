@@ -313,9 +313,9 @@
         </div>
     </div>
 
-    <!-- Modal para crear/editar casa -->
+    <!-- Modal para crear/editar casa con TABS -->
     <div class="modal fade" id="modalCasa" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="modalCasaTitle">
@@ -324,111 +324,270 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="formCasa">
+                    <form id="formCasa" enctype="multipart/form-data">
                         <input type="hidden" id="casaId" name="id">
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="estilo" class="form-label">
-                                        <i class="fas fa-tag me-1"></i>Nombre/Estilo *
-                                    </label>
-                                    <input type="text" class="form-control" id="estilo" name="estilo" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="numero" class="form-label">
-                                        <i class="fas fa-hashtag me-1"></i>Número *
-                                    </label>
-                                    <input type="number" class="form-control" id="numero" name="numero" min="1" required>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="mb-3">
-                                    <label for="capacidad" class="form-label">
-                                        <i class="fas fa-users me-1"></i>Capacidad *
-                                    </label>
-                                    <input type="number" class="form-control" id="capacidad" name="capacidad" min="1" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="precio" class="form-label">
-                                        <i class="fas fa-dollar-sign me-1"></i>Precio por noche *
-                                    </label>
-                                    <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="0" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="estado" class="form-label">
-                                        <i class="fas fa-toggle-on me-1"></i>Estado
-                                    </label>
-                                    <select class="form-select" id="estado" name="estado">
-                                        <option value="1">Activa</option>
-                                        <option value="0">Inactiva</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="slug" class="form-label">
-                                <i class="fas fa-link me-1"></i>Slug (URL amigable)
-                            </label>
-                            <input type="text" class="form-control" id="slug" name="slug" placeholder="Se genera automáticamente si se deja vacío">
-                        </div>
-
-                        <!-- Gestión de imagen -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="fas fa-image me-1"></i>Foto principal
-                            </label>
-                            
-                            <!-- Preview de imagen actual -->
-                            <div id="imagenPreview" class="mb-3" style="display: none;">
-                                <div class="position-relative d-inline-block">
-                                    <img id="imagenActual" src="" alt="Imagen actual" class="img-thumbnail" style="max-width: 200px; max-height: 150px; object-fit: cover;">
-                                    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" id="btnEliminarImagen" style="transform: translate(50%, -50%);">
-                                        <i class="fas fa-times"></i>
-                                    </button>
-                                </div>
-                                <div class="mt-2">
-                                    <small class="text-muted">Imagen actual: <span id="nombreImagenActual"></span></small>
-                                </div>
-                            </div>
-                            
-                            <!-- Input para subir nueva imagen -->
-                            <div class="input-group">
-                                <input type="file" class="form-control" id="inputImagen" accept="image/*">
-                                <button type="button" class="btn btn-outline-primary" id="btnSubirImagen">
-                                    <i class="fas fa-upload me-1"></i>Subir
+                        <!-- Navegación por Tabs -->
+                        <ul class="nav nav-tabs mb-4" id="casaTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="general-tab" data-bs-toggle="tab" data-bs-target="#tabGeneral" type="button">
+                                    <i class="fas fa-info-circle me-1"></i>General
                                 </button>
-                            </div>
-                            <div class="form-text">
-                                Formatos permitidos: JPG, PNG, GIF, WEBP. Tamaño máximo: 5MB
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="ubicacion-tab" data-bs-toggle="tab" data-bs-target="#tabUbicacion" type="button">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Ubicación
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="multimedia-tab" data-bs-toggle="tab" data-bs-target="#tabMultimedia" type="button">
+                                    <i class="fas fa-images me-1"></i>Multimedia
+                                </button>
+                            </li>
+                        </ul>
+                        
+                        <!-- Contenido de Tabs -->
+                        <div class="tab-content" id="casaTabsContent">
+                            
+                            <!-- TAB GENERAL -->
+                            <div class="tab-pane fade show active" id="tabGeneral" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="estilo" class="form-label">
+                                                <i class="fas fa-tag me-1"></i>Nombre/Estilo *
+                                            </label>
+                                            <input type="text" class="form-control" id="estilo" name="estilo" placeholder="Ej: Casa Via-Mar" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="numero" class="form-label">
+                                                <i class="fas fa-hashtag me-1"></i>Número *
+                                            </label>
+                                            <input type="number" class="form-control" id="numero" name="numero" min="1" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="estado" class="form-label">
+                                                <i class="fas fa-toggle-on me-1"></i>Estado
+                                            </label>
+                                            <select class="form-select" id="estado" name="estado">
+                                                <option value="1">Activa</option>
+                                                <option value="0">Inactiva</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="precio" class="form-label">
+                                                <i class="fas fa-dollar-sign me-1"></i>Precio/noche *
+                                            </label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">$</span>
+                                                <input type="number" class="form-control" id="precio" name="precio" step="0.01" min="0" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            <label for="capacidad" class="form-label">
+                                                <i class="fas fa-users me-1"></i>Capacidad *
+                                            </label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="capacidad" name="capacidad" min="1" required>
+                                                <span class="input-group-text">personas</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="habitaciones_num" class="form-label">
+                                                <i class="fas fa-door-open me-1"></i>Habitaciones
+                                            </label>
+                                            <input type="number" class="form-control" id="habitaciones_num" name="habitaciones_num" min="1" value="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="camas" class="form-label">
+                                                <i class="fas fa-bed me-1"></i>Camas
+                                            </label>
+                                            <input type="number" class="form-control" id="camas" name="camas" min="1" value="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="mb-3">
+                                            <label for="banos" class="form-label">
+                                                <i class="fas fa-bath me-1"></i>Baños
+                                            </label>
+                                            <input type="number" class="form-control" id="banos" name="banos" min="1" value="1">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="slug" class="form-label">
+                                        <i class="fas fa-link me-1"></i>Slug (URL amigable)
+                                    </label>
+                                    <input type="text" class="form-control" id="slug" name="slug" placeholder="Se genera automáticamente desde el nombre">
+                                    <div class="form-text">Ej: casa-via-mar (se usa en la URL del detalle)</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="descripcion" class="form-label">
+                                        <i class="fas fa-align-left me-1"></i>Descripción completa *
+                                    </label>
+                                    <textarea class="form-control" id="descripcion" name="descripcion" rows="5" 
+                                        placeholder="Describe las características principales de la propiedad..." required></textarea>
+                                </div>
                             </div>
                             
-                            <!-- Input oculto para el nombre del archivo -->
-                            <input type="hidden" id="foto" name="foto">
-                        </div>
+                            <!-- TAB UBICACIÓN -->
+                            <div class="tab-pane fade" id="tabUbicacion" role="tabpanel">
+                                <div class="alert alert-info mb-4">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Tip:</strong> Puedes obtener las coordenadas desde Google Maps haciendo clic derecho en la ubicación.
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="direccion" class="form-label">
+                                        <i class="fas fa-map-marker-alt me-1"></i>Dirección completa
+                                    </label>
+                                    <textarea class="form-control" id="direccion" name="direccion" rows="2" 
+                                        placeholder="Calle, número, colonia, ciudad, estado, código postal..."></textarea>
+                                </div>
 
-                        <div class="mb-3">
-                            <label for="video" class="form-label">
-                                <i class="fas fa-video me-1"></i>Video
-                            </label>
-                            <input type="text" class="form-control" id="video" name="video" placeholder="URL del video">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="descripcion" class="form-label">
-                                <i class="fas fa-align-left me-1"></i>Descripción *
-                            </label>
-                            <textarea class="form-control" id="descripcion" name="descripcion" rows="4" required></textarea>
+                                <div class="row">
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label for="latitud" class="form-label">
+                                                <i class="fas fa-globe me-1"></i>Latitud
+                                            </label>
+                                            <input type="text" class="form-control" id="latitud" name="latitud" 
+                                                placeholder="Ej: 20.478929" pattern="-?[0-9]*.?[0-9]+">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div class="mb-3">
+                                            <label for="longitud" class="form-label">
+                                                <i class="fas fa-globe me-1"></i>Longitud
+                                            </label>
+                                            <input type="text" class="form-control" id="longitud" name="longitud" 
+                                                placeholder="Ej: -97.008849" pattern="-?[0-9]*.?[0-9]+">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <div class="mb-3 w-100">
+                                            <button type="button" class="btn btn-outline-success w-100" id="btnVerificarMapa" 
+                                                title="Verificar ubicación en Google Maps">
+                                                <i class="fas fa-map me-1"></i>Ver Mapa
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Preview del mapa -->
+                                <div id="mapaPreview" class="mt-3" style="display: none;">
+                                    <div class="card">
+                                        <div class="card-header bg-light">
+                                            <i class="fas fa-map-marked-alt me-2"></i>Vista previa de ubicación
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <iframe id="iframeMapa" width="100%" height="300" frameborder="0" style="border:0;" 
+                                                allowfullscreen="" loading="lazy"></iframe>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- TAB MULTIMEDIA -->
+                            <div class="tab-pane fade" id="tabMultimedia" role="tabpanel">
+                                
+                                <!-- FOTO PRINCIPAL -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-primary text-white">
+                                        <i class="fas fa-image me-2"></i>Foto Principal (Portada)
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="imagenPreview" class="mb-3" style="display: none;">
+                                            <div class="position-relative d-inline-block">
+                                                <img id="imagenActual" src="" alt="Imagen actual" class="img-thumbnail" 
+                                                    style="max-width: 250px; max-height: 180px; object-fit: cover;">
+                                                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" 
+                                                    id="btnEliminarImagen" style="transform: translate(50%, -50%);">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                            <div class="mt-2">
+                                                <small class="text-success"><i class="fas fa-check-circle me-1"></i>Imagen actual: <span id="nombreImagenActual"></span></small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="input-group">
+                                            <input type="file" class="form-control" id="inputImagen" accept="image/*">
+                                            <button type="button" class="btn btn-primary" id="btnSubirImagen">
+                                                <i class="fas fa-upload me-1"></i>Subir Portada
+                                            </button>
+                                        </div>
+                                        <div class="form-text">Esta imagen se mostrará en el catálogo. Formatos: JPG, PNG, GIF, WEBP. Máximo: 5MB</div>
+                                        <input type="hidden" id="foto" name="foto">
+                                    </div>
+                                </div>
+                                
+                                <!-- GALERÍA DE FOTOS -->
+                                <div class="card mb-4">
+                                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-images me-2"></i>Galería de Fotos</span>
+                                        <span class="badge bg-light text-dark" id="contadorFotos">0/10 fotos</span>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-warning mb-3" id="alertaMaxFotos" style="display: none;">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Has alcanzado el máximo de 10 fotos permitidas.
+                                        </div>
+                                        
+                                        <!-- Grid de fotos existentes -->
+                                        <div class="row g-3 mb-4" id="galeriaFotosContainer">
+                                            <!-- Las fotos se cargarán dinámicamente aquí -->
+                                        </div>
+                                        
+                                        <!-- Input para subir nuevas fotos -->
+                                        <div id="subirGaleriaContainer">
+                                            <div class="input-group">
+                                                <input type="file" class="form-control" id="inputGaleria" accept="image/*" multiple>
+                                                <button type="button" class="btn btn-success" id="btnSubirGaleria">
+                                                    <i class="fas fa-cloud-upload-alt me-1"></i>Subir a Galería
+                                                </button>
+                                            </div>
+                                            <div class="form-text">Selecciona hasta 10 fotos adicionales. Se mostrarán en la página de detalle.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- VIDEO -->
+                                <div class="card">
+                                    <div class="card-header bg-danger text-white">
+                                        <i class="fas fa-video me-2"></i>Video (Opcional)
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="video" class="form-label">URL del video (YouTube o Vimeo)</label>
+                                            <input type="url" class="form-control" id="video" name="video" 
+                                                placeholder="https://www.youtube.com/watch?v=...">
+                                        </div>
+                                        <div id="videoPreview" style="display: none;">
+                                            <div class="ratio ratio-16x9">
+                                                <iframe id="iframeVideo" src="" allowfullscreen></iframe>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
                 </div>

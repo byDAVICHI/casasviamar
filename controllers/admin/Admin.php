@@ -350,25 +350,54 @@ class Admin extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            error_log("=== CREARCASA COMPLETO v3 ===");
+            
             if (validarCampos(['estilo', 'numero', 'capacidad', 'precio', 'descripcion'])) {
+                
+                // Generar slug automático si está vacío
+                $slug = strClean($_POST['slug'] ?? '');
+                if (empty($slug)) {
+                    $slug = $this->generarSlug($_POST['estilo']);
+                }
+                
+                // Obtener TODOS los valores del formulario
                 $estilo = strClean($_POST['estilo']);
                 $numero = intval($_POST['numero']);
                 $capacidad = intval($_POST['capacidad']);
-                $slug = strClean($_POST['slug']);
-                $foto = strClean($_POST['foto']);
-                $video = strClean($_POST['video']);
+                $habitaciones_num = intval($_POST['habitaciones_num'] ?? 1);
+                $camas = intval($_POST['camas'] ?? 1);
+                $banos = intval($_POST['banos'] ?? 1);
                 $descripcion = strClean($_POST['descripcion']);
                 $precio = floatval($_POST['precio']);
-                $estado = isset($_POST['estado']) ? intval($_POST['estado']) : 1;
+                $estado = intval($_POST['estado'] ?? 1);
+                $foto = strClean($_POST['foto'] ?? '');
+                $video = strClean($_POST['video'] ?? '');
+                $direccion = strClean($_POST['direccion'] ?? '');
                 
-                // Generar slug automático si está vacío
-                if (empty($slug)) {
-                    $slug = strtolower(str_replace(' ', '-', $estilo));
+                // LATITUD Y LONGITUD
+                $latitud = null;
+                $longitud = null;
+                if (!empty($_POST['latitud']) && is_numeric($_POST['latitud'])) {
+                    $latitud = floatval($_POST['latitud']);
+                }
+                if (!empty($_POST['longitud']) && is_numeric($_POST['longitud'])) {
+                    $longitud = floatval($_POST['longitud']);
                 }
                 
-                $resultado = $this->model->crearCasa($estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado);
+                error_log("crearCasa - estilo: $estilo, lat: " . ($latitud ?? 'NULL') . ", lng: " . ($longitud ?? 'NULL'));
+                
+                // Crear con todos los campos
+                $resultado = $this->model->crearCasaConUbicacion(
+                    $estilo, $numero, $capacidad, $habitaciones_num, $camas, $banos,
+                    $slug, $descripcion, $precio, $direccion, $latitud, $longitud, $estado, $foto, $video
+                );
+                
                 if ($resultado) {
-                    $res = ['tipo' => 'success', 'msg' => 'CASA VACACIONAL CREADA CORRECTAMENTE'];
+                    $res = [
+                        'tipo' => 'success', 
+                        'msg' => 'CASA VACACIONAL CREADA CORRECTAMENTE',
+                        'id_casa' => $resultado
+                    ];
                 } else {
                     $res = ['tipo' => 'error', 'msg' => 'ERROR AL CREAR LA CASA VACACIONAL'];
                 }
@@ -389,37 +418,194 @@ class Admin extends Controller
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $id = intval($_POST['id']);
+            error_log("=== EDITARCASA COMPLETO v3 ===");
+            error_log("POST: " . json_encode($_POST));
+            
+            $id = intval($_POST['id'] ?? 0);
             
             if ($id > 0 && validarCampos(['estilo', 'numero', 'capacidad', 'precio', 'descripcion'])) {
+                
+                // Generar slug automático si está vacío
+                $slug = strClean($_POST['slug'] ?? '');
+                if (empty($slug)) {
+                    $slug = $this->generarSlug($_POST['estilo']);
+                }
+                
+                // Obtener valores del formulario - TODOS LOS CAMPOS
                 $estilo = strClean($_POST['estilo']);
                 $numero = intval($_POST['numero']);
                 $capacidad = intval($_POST['capacidad']);
-                $slug = strClean($_POST['slug']);
-                $foto = strClean($_POST['foto']);
-                $video = strClean($_POST['video']);
+                $habitaciones_num = intval($_POST['habitaciones_num'] ?? 1);
+                $camas = intval($_POST['camas'] ?? 1);
+                $banos = intval($_POST['banos'] ?? 1);
                 $descripcion = strClean($_POST['descripcion']);
                 $precio = floatval($_POST['precio']);
-                $estado = isset($_POST['estado']) ? intval($_POST['estado']) : 1;
+                $estado = intval($_POST['estado'] ?? 1);
+                $video = strClean($_POST['video'] ?? '');
+                $direccion = strClean($_POST['direccion'] ?? '');
                 
-                // Generar slug automático si está vacío
-                if (empty($slug)) {
-                    $slug = strtolower(str_replace(' ', '-', $estilo));
+                // LATITUD Y LONGITUD - Convertir a float o null
+                $latitud = null;
+                $longitud = null;
+                if (!empty($_POST['latitud']) && is_numeric($_POST['latitud'])) {
+                    $latitud = floatval($_POST['latitud']);
+                }
+                if (!empty($_POST['longitud']) && is_numeric($_POST['longitud'])) {
+                    $longitud = floatval($_POST['longitud']);
                 }
                 
-                $resultado = $this->model->editarCasa($id, $estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado);
+                error_log("Latitud recibida: " . ($_POST['latitud'] ?? 'VACIO') . " -> " . ($latitud ?? 'NULL'));
+                error_log("Longitud recibida: " . ($_POST['longitud'] ?? 'VACIO') . " -> " . ($longitud ?? 'NULL'));
+                
+                // Obtener foto actual si no se proporciona una nueva
+                $foto = strClean($_POST['foto'] ?? '');
+                if (empty($foto)) {
+                    $casaActual = $this->model->getCasa($id);
+                    $foto = $casaActual['foto'] ?? '';
+                }
+                
+                // Actualizar usando query directa con TODOS los campos
+                $resultado = $this->model->actualizarCasaConUbicacion(
+                    $id, $estilo, $numero, $capacidad, $habitaciones_num, $camas, $banos,
+                    $slug, $descripcion, $precio, $direccion, $latitud, $longitud, $estado, $foto, $video
+                );
+                
+                error_log("Resultado actualizarCasaConUbicacion: " . ($resultado ? "OK" : "FALLO"));
+                
                 if ($resultado) {
-                    $res = ['tipo' => 'success', 'msg' => 'CASA VACACIONAL ACTUALIZADA CORRECTAMENTE'];
+                    $res = [
+                        'tipo' => 'success', 
+                        'msg' => 'CASA VACACIONAL ACTUALIZADA CORRECTAMENTE',
+                        'id_casa' => $id
+                    ];
                 } else {
                     $res = ['tipo' => 'error', 'msg' => 'ERROR AL ACTUALIZAR LA CASA VACACIONAL'];
                 }
             } else {
-                $res = ['tipo' => 'warning', 'msg' => 'DATOS INCOMPLETOS O INVÁLIDOS'];
+                $res = ['tipo' => 'warning', 'msg' => 'DATOS INCOMPLETOS O INVÁLIDOS. ID: ' . $id];
             }
             
             echo json_encode($res, JSON_UNESCAPED_UNICODE);
             die();
         }
+    }
+    
+    // Función auxiliar para generar slug
+    private function generarSlug($texto)
+    {
+        $slug = strtolower(trim($texto));
+        $slug = preg_replace('/[áàäâã]/u', 'a', $slug);
+        $slug = preg_replace('/[éèëê]/u', 'e', $slug);
+        $slug = preg_replace('/[íìïî]/u', 'i', $slug);
+        $slug = preg_replace('/[óòöôõ]/u', 'o', $slug);
+        $slug = preg_replace('/[úùüû]/u', 'u', $slug);
+        $slug = preg_replace('/[ñ]/u', 'n', $slug);
+        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
+        $slug = preg_replace('/[\s_]+/', '-', $slug);
+        $slug = preg_replace('/-+/', '-', $slug);
+        return trim($slug, '-');
+    }
+    
+    // Subir múltiples fotos a la galería
+    public function subirFotosGaleria()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['imagenes']) && isset($_POST['id_habitacion'])) {
+            $id_habitacion = intval($_POST['id_habitacion']);
+            
+            // Verificar cuántas fotos ya tiene
+            $fotosActuales = $this->model->getFotosPropiedad($id_habitacion);
+            $cantidadActual = count($fotosActuales);
+            
+            if ($cantidadActual >= 10) {
+                echo json_encode(['tipo' => 'warning', 'msg' => 'Ya tienes el máximo de 10 fotos permitidas']);
+                die();
+            }
+            
+            $archivos = $_FILES['imagenes'];
+            $tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            $fotosSubidas = [];
+            $errores = [];
+            
+            // Calcular cuántas fotos se pueden subir
+            $espacioDisponible = 10 - $cantidadActual;
+            $cantidadArchivos = count($archivos['name']);
+            
+            if ($cantidadArchivos > $espacioDisponible) {
+                echo json_encode([
+                    'tipo' => 'warning', 
+                    'msg' => "Solo puedes subir $espacioDisponible foto(s) más. Tienes $cantidadActual de 10."
+                ]);
+                die();
+            }
+            
+            $directorioDestino = 'assets/principal/images/propiedades/';
+            if (!file_exists($directorioDestino)) {
+                mkdir($directorioDestino, 0777, true);
+            }
+            
+            for ($i = 0; $i < $cantidadArchivos; $i++) {
+                if ($archivos['error'][$i] !== UPLOAD_ERR_OK) {
+                    $errores[] = "Error al subir: " . $archivos['name'][$i];
+                    continue;
+                }
+                
+                // Validar tipo
+                if (!in_array($archivos['type'][$i], $tiposPermitidos)) {
+                    $errores[] = "Formato no válido: " . $archivos['name'][$i];
+                    continue;
+                }
+                
+                // Validar tamaño (5MB)
+                if ($archivos['size'][$i] > 5 * 1024 * 1024) {
+                    $errores[] = "Archivo muy grande: " . $archivos['name'][$i];
+                    continue;
+                }
+                
+                // Generar nombre único
+                $extension = pathinfo($archivos['name'][$i], PATHINFO_EXTENSION);
+                $nombreArchivo = 'prop_' . $id_habitacion . '_' . time() . '_' . rand(1000, 9999) . '.' . $extension;
+                $rutaCompleta = $directorioDestino . $nombreArchivo;
+                
+                if (move_uploaded_file($archivos['tmp_name'][$i], $rutaCompleta)) {
+                    // Guardar en BD
+                    $orden = $cantidadActual + $i + 1;
+                    $this->model->agregarFotoPropiedad($id_habitacion, $nombreArchivo, 0, $orden);
+                    
+                    $fotosSubidas[] = [
+                        'nombre' => $nombreArchivo,
+                        'ruta' => $rutaCompleta
+                    ];
+                } else {
+                    $errores[] = "No se pudo guardar: " . $archivos['name'][$i];
+                }
+            }
+            
+            if (count($fotosSubidas) > 0) {
+                $msg = count($fotosSubidas) . " foto(s) subida(s) correctamente";
+                if (count($errores) > 0) {
+                    $msg .= ". Errores: " . implode(", ", $errores);
+                }
+                echo json_encode([
+                    'tipo' => 'success',
+                    'msg' => $msg,
+                    'fotos' => $fotosSubidas,
+                    'total' => $cantidadActual + count($fotosSubidas)
+                ]);
+            } else {
+                echo json_encode([
+                    'tipo' => 'error',
+                    'msg' => 'No se pudo subir ninguna foto. ' . implode(", ", $errores)
+                ]);
+            }
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'Datos incompletos']);
+        }
+        die();
     }
 
     public function eliminarCasa()
@@ -545,6 +731,199 @@ class Admin extends Controller
             }
         } else {
             echo json_encode(['tipo' => 'error', 'msg' => 'Nombre de archivo no proporcionado']);
+        }
+        die();
+    }
+
+    // ==================== GESTIÓN DE FOTOS MÚLTIPLES ====================
+    
+    public function getFotosPropiedad()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id > 0) {
+            $fotos = $this->model->getFotosPropiedad($id);
+            echo json_encode(['tipo' => 'success', 'fotos' => $fotos]);
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'ID no válido']);
+        }
+        die();
+    }
+
+    public function subirFotoPropiedad()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['imagen']) && isset($_POST['id_habitacion'])) {
+            $archivo = $_FILES['imagen'];
+            $id_habitacion = intval($_POST['id_habitacion']);
+            $es_principal = isset($_POST['es_principal']) ? intval($_POST['es_principal']) : 0;
+            
+            $tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!in_array($archivo['type'], $tiposPermitidos)) {
+                echo json_encode(['tipo' => 'error', 'msg' => 'Solo se permiten archivos de imagen']);
+                die();
+            }
+            
+            if ($archivo['size'] > 5 * 1024 * 1024) {
+                echo json_encode(['tipo' => 'error', 'msg' => 'El archivo es demasiado grande. Máximo 5MB']);
+                die();
+            }
+            
+            $directorioDestino = 'assets/principal/images/propiedades/';
+            if (!file_exists($directorioDestino)) {
+                mkdir($directorioDestino, 0777, true);
+            }
+            
+            $extension = pathinfo($archivo['name'], PATHINFO_EXTENSION);
+            $nombreArchivo = 'prop_' . $id_habitacion . '_' . time() . '_' . rand(1000, 9999) . '.' . $extension;
+            $rutaCompleta = $directorioDestino . $nombreArchivo;
+            
+            if (move_uploaded_file($archivo['tmp_name'], $rutaCompleta)) {
+                // Guardar en base de datos
+                $this->model->agregarFotoPropiedad($id_habitacion, $nombreArchivo, $es_principal);
+                
+                echo json_encode([
+                    'tipo' => 'success',
+                    'msg' => 'Imagen subida correctamente',
+                    'nombre_archivo' => $nombreArchivo,
+                    'ruta' => $rutaCompleta
+                ]);
+            } else {
+                echo json_encode(['tipo' => 'error', 'msg' => 'Error al subir la imagen']);
+            }
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'Datos incompletos']);
+        }
+        die();
+    }
+
+    public function eliminarFotoPropiedad()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id_foto'])) {
+            $id_foto = intval($_POST['id_foto']);
+            $foto = $this->model->eliminarFotoPropiedad($id_foto);
+            
+            if ($foto) {
+                // Eliminar archivo físico
+                $rutaArchivo = 'assets/principal/images/propiedades/' . $foto['url_imagen'];
+                if (file_exists($rutaArchivo)) {
+                    unlink($rutaArchivo);
+                }
+                echo json_encode(['tipo' => 'success', 'msg' => 'Foto eliminada correctamente']);
+            } else {
+                echo json_encode(['tipo' => 'error', 'msg' => 'Error al eliminar la foto']);
+            }
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'ID de foto no proporcionado']);
+        }
+        die();
+    }
+
+    public function setFotoPrincipal()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id_foto']) && isset($_POST['id_habitacion'])) {
+            $id_foto = intval($_POST['id_foto']);
+            $id_habitacion = intval($_POST['id_habitacion']);
+            
+            $this->model->setFotoPrincipal($id_foto, $id_habitacion);
+            echo json_encode(['tipo' => 'success', 'msg' => 'Foto principal actualizada']);
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'Datos incompletos']);
+        }
+        die();
+    }
+
+    // ==================== GESTIÓN DE AMENIDADES ====================
+    
+    public function getAmenidades()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        $amenidades = $this->model->getAmenidades();
+        echo json_encode(['tipo' => 'success', 'amenidades' => $amenidades]);
+        die();
+    }
+
+    public function getAmenidadesPropiedad()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id > 0) {
+            $amenidades = $this->model->getAmenidadesPropiedad($id);
+            echo json_encode(['tipo' => 'success', 'amenidades' => $amenidades]);
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'ID no válido']);
+        }
+        die();
+    }
+
+    public function guardarAmenidadesPropiedad()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+            $id_habitacion = isset($_POST['id_habitacion']) ? intval($_POST['id_habitacion']) : 0;
+            $amenidades = isset($_POST['amenidades']) ? $_POST['amenidades'] : [];
+            
+            if ($id_habitacion > 0) {
+                $this->model->setAmenidadesPropiedad($id_habitacion, $amenidades);
+                echo json_encode(['tipo' => 'success', 'msg' => 'Amenidades guardadas correctamente']);
+            } else {
+                echo json_encode(['tipo' => 'error', 'msg' => 'ID de propiedad no válido']);
+            }
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'Método no permitido']);
+        }
+        die();
+    }
+
+    // ==================== GESTIÓN EXTENDIDA DE PROPIEDADES ====================
+    
+    public function getCasaCompleta()
+    {
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id > 0) {
+            $casa = $this->model->getCasaCompleta($id);
+            if ($casa) {
+                echo json_encode(['tipo' => 'success', 'casa' => $casa], JSON_UNESCAPED_UNICODE);
+            } else {
+                echo json_encode(['tipo' => 'error', 'msg' => 'Casa no encontrada']);
+            }
+        } else {
+            echo json_encode(['tipo' => 'error', 'msg' => 'ID no válido']);
         }
         die();
     }

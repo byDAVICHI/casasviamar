@@ -1,0 +1,633 @@
+<?php
+include_once 'views/template/header-principal.php';
+
+// Datos de la propiedad
+$propiedad = $data['propiedad'];
+$fotos = $propiedad['fotos'] ?? [];
+$amenidades = $propiedad['amenidades'] ?? [];
+$evaluaciones = $propiedad['evaluaciones'] ?? [];
+$estadisticas = $propiedad['estadisticas'] ?? [];
+
+// Valores calculados
+$rating = number_format($estadisticas['promedio_general'] ?? $propiedad['calificacion_promedio'] ?? 0, 2);
+$totalEvaluaciones = $estadisticas['total_evaluaciones'] ?? $propiedad['total_evaluaciones'] ?? 0;
+$precioNoche = $propiedad['precio'];
+$tarifaLimpieza = $propiedad['tarifa_limpieza'] ?? 0;
+
+// Foto principal
+$fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
+?>
+
+<!-- Font Awesome 5 para iconos modernos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- CSS Airbnb -->
+<link rel="stylesheet" href="<?php echo RUTA_PRINCIPAL; ?>assets/principal/css/airbnb-style.css">
+<!-- Leaflet CSS para mapa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="detalle-container">
+    <!-- Header -->
+    <div class="detalle-header">
+        <h1 class="detalle-title"><?php echo htmlspecialchars($propiedad['estilo']); ?></h1>
+        <div class="detalle-subtitle">
+            <?php if ($rating > 0): ?>
+                <span class="detalle-rating">
+                    <i class="fas fa-star"></i> <?php echo $rating; ?>
+                </span>
+                <span class="separator"></span>
+                <span class="detalle-reviews"><?php echo $totalEvaluaciones; ?> evaluaciones</span>
+                <span class="separator"></span>
+            <?php endif; ?>
+            <?php if (!empty($propiedad['es_favorito_huespedes'])): ?>
+                <span><i class="fas fa-award me-1"></i>Favorito entre huéspedes</span>
+                <span class="separator"></span>
+            <?php endif; ?>
+            <span class="detalle-location">
+                <i class="fas fa-map-marker-alt me-1"></i>
+                <?php echo htmlspecialchars($propiedad['direccion'] ?? 'Tecolutla, Veracruz, México'); ?>
+            </span>
+            
+            <div class="detalle-actions">
+                <button onclick="compartir()"><i class="fas fa-share-alt"></i> Compartir</button>
+                <button onclick="toggleFavorito(<?php echo $propiedad['id']; ?>)">
+                    <i class="<?php echo isset($data['es_favorito']) && $data['es_favorito'] ? 'fas' : 'far'; ?> fa-heart"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Galería Hero -->
+    <div class="galeria-hero">
+        <div class="galeria-hero-main">
+            <img src="<?php echo $fotoPrincipal; ?>" 
+                 alt="<?php echo htmlspecialchars($propiedad['estilo']); ?>"
+                 onclick="abrirGaleria(0)"
+                 onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'">
+        </div>
+        <div class="galeria-hero-grid">
+            <?php 
+            $fotosGrid = array_slice($fotos, 0, 4);
+            $totalFotos = count($fotos);
+            foreach ($fotosGrid as $index => $foto): 
+                $rutaFoto = RUTA_PRINCIPAL . 'assets/principal/images/propiedades/' . $foto['url_imagen'];
+            ?>
+                <div class="galeria-hero-item">
+                    <img src="<?php echo $rutaFoto; ?>" 
+                         alt="Foto <?php echo $index + 2; ?>"
+                         onclick="abrirGaleria(<?php echo $index + 1; ?>)"
+                         onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'">
+                    <?php if ($index === 3 && $totalFotos > 4): ?>
+                        <button class="btn-mostrar-fotos" onclick="abrirGaleria(0)">
+                            <i class="fas fa-th"></i> Mostrar todas las fotos
+                        </button>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+            
+            <?php // Rellenar con imagen principal si no hay suficientes fotos
+            for ($i = count($fotosGrid); $i < 4; $i++): ?>
+                <div class="galeria-hero-item">
+                    <img src="<?php echo $fotoPrincipal; ?>" 
+                         alt="Foto <?php echo $i + 2; ?>"
+                         onclick="abrirGaleria(0)">
+                </div>
+            <?php endfor; ?>
+        </div>
+    </div>
+
+    <!-- Contenido Principal -->
+    <div class="detalle-content">
+        <!-- Columna Izquierda - Información -->
+        <div class="detalle-info">
+            <!-- Info del Host -->
+            <div class="info-host">
+                <div class="info-host-details">
+                    <h2>Casa vacacional alojada por Via-Mar</h2>
+                    <p>
+                        <?php echo $propiedad['capacidad']; ?> huéspedes · 
+                        <?php echo $propiedad['habitaciones_num'] ?? 1; ?> habitación · 
+                        <?php echo $propiedad['camas'] ?? 1; ?> cama · 
+                        <?php echo $propiedad['banos'] ?? 1; ?> baño
+                    </p>
+                </div>
+                <div class="info-host-avatar">
+                    <img src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/logodefinitivo.png" alt="Via-Mar">
+                </div>
+            </div>
+
+            <!-- Highlights -->
+            <div class="info-highlights">
+                <?php if (!empty($propiedad['es_favorito_huespedes'])): ?>
+                <div class="highlight-item">
+                    <div class="highlight-icon"><i class="fas fa-award"></i></div>
+                    <div class="highlight-text">
+                        <h4>Favorito entre huéspedes</h4>
+                        <p>Uno de los alojamientos más populares según las valoraciones de los huéspedes.</p>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <div class="highlight-item">
+                    <div class="highlight-icon"><i class="fas fa-door-open"></i></div>
+                    <div class="highlight-text">
+                        <h4>Llegada autónoma</h4>
+                        <p>Accede a la propiedad usando la caja de seguridad para llaves.</p>
+                    </div>
+                </div>
+                
+                <div class="highlight-item">
+                    <div class="highlight-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="highlight-text">
+                        <h4>Cancelación gratuita antes de 48 horas</h4>
+                        <p>Si cambias de opinión, recibirás un reembolso completo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Descripción -->
+            <div class="info-descripcion">
+                <p id="descripcionTexto">
+                    <?php echo nl2br(htmlspecialchars($propiedad['descripcion'])); ?>
+                </p>
+                <button class="btn-mostrar-mas" onclick="toggleDescripcion()">
+                    Mostrar más <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Dónde vas a dormir -->
+            <div class="info-dormitorio">
+                <h3>Dónde vas a dormir</h3>
+                <div class="dormitorio-card">
+                    <img src="<?php echo $fotoPrincipal; ?>" alt="Recámara">
+                    <h4>Recámara</h4>
+                    <p><?php echo $propiedad['camas'] ?? 1; ?> cama<?php echo ($propiedad['camas'] ?? 1) > 1 ? 's' : ''; ?></p>
+                </div>
+            </div>
+
+            <!-- Amenidades -->
+            <div class="info-amenidades">
+                <h3>Lo que ofrece este lugar</h3>
+                <div class="amenidades-grid">
+                    <?php 
+                    $amenidadesMostrar = array_slice($amenidades, 0, 10);
+                    foreach ($amenidadesMostrar as $amenidad): 
+                    ?>
+                        <div class="amenidad-item">
+                            <i class="<?php echo $amenidad['icono'] ?? 'fas fa-check'; ?>"></i>
+                            <span><?php echo htmlspecialchars($amenidad['nombre']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                    
+                    <?php if (empty($amenidades)): ?>
+                        <!-- Amenidades por defecto -->
+                        <div class="amenidad-item"><i class="fas fa-wifi"></i><span>Wifi</span></div>
+                        <div class="amenidad-item"><i class="fas fa-utensils"></i><span>Cocina</span></div>
+                        <div class="amenidad-item"><i class="fas fa-parking"></i><span>Estacionamiento gratuito</span></div>
+                        <div class="amenidad-item"><i class="fas fa-tv"></i><span>TV</span></div>
+                        <div class="amenidad-item"><i class="fas fa-snowflake"></i><span>Aire acondicionado</span></div>
+                        <div class="amenidad-item"><i class="fas fa-tshirt"></i><span>Lavadora</span></div>
+                    <?php endif; ?>
+                </div>
+                <?php if (count($amenidades) > 10): ?>
+                    <button class="btn-mostrar-amenidades" onclick="mostrarTodasAmenidades()">
+                        Mostrar las <?php echo count($amenidades); ?> amenidades
+                    </button>
+                <?php endif; ?>
+            </div>
+
+            <!-- Calendario de disponibilidad -->
+            <div class="info-calendario">
+                <h3><?php echo $data['noches'] ?? 0; ?> noches en Tecolutla</h3>
+                <p><?php echo date('j \d\e F \d\e Y'); ?></p>
+                <div id="calendario-disponibilidad"></div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha - Widget de Reserva (Sticky) -->
+        <div class="reserva-widget" data-precio="<?php echo $precioNoche; ?>" data-limpieza="<?php echo $tarifaLimpieza; ?>">
+            <div class="reserva-precio">
+                <span class="reserva-precio-valor">$<?php echo number_format($precioNoche, 2); ?> MXN</span>
+                <span class="reserva-precio-periodo">por noche</span>
+                <?php if ($rating > 0): ?>
+                    <div class="reserva-rating">
+                        <i class="fas fa-star"></i>
+                        <span><?php echo $rating; ?></span>
+                        <span class="text-muted">· <?php echo $totalEvaluaciones; ?> evaluaciones</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="reserva-form">
+                <div class="reserva-fechas">
+                    <div class="reserva-fecha-input">
+                        <label>LLEGADA</label>
+                        <input type="date" id="fecha_llegada" name="fecha_llegada" 
+                               min="<?php echo date('Y-m-d'); ?>"
+                               value="<?php echo $data['fecha_llegada'] ?? ''; ?>">
+                    </div>
+                    <div class="reserva-fecha-input">
+                        <label>SALIDA</label>
+                        <input type="date" id="fecha_salida" name="fecha_salida"
+                               min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
+                               value="<?php echo $data['fecha_salida'] ?? ''; ?>">
+                    </div>
+                </div>
+                <div class="reserva-huespedes" onclick="toggleHuespedes()">
+                    <label>HUÉSPEDES</label>
+                    <div class="reserva-huespedes-selector">
+                        <span id="huespedes_texto">1 huésped</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <input type="hidden" id="num_huespedes" value="1">
+                </div>
+            </div>
+
+            <button class="btn-reservar" id="btnReservar" onclick="iniciarReserva()">
+                Reservar
+            </button>
+
+            <p class="reserva-nota">Aún no se te cobrará nada</p>
+
+            <div class="reserva-desglose" id="desglose" style="display: none;">
+                <div class="desglose-item">
+                    <span>$<?php echo number_format($precioNoche, 2); ?> MXN x <span id="num_noches">0</span> noches</span>
+                    <span id="subtotal_noches">$0.00</span>
+                </div>
+                <?php if ($tarifaLimpieza > 0): ?>
+                <div class="desglose-item">
+                    <span>Tarifa de limpieza</span>
+                    <span>$<?php echo number_format($tarifaLimpieza, 2); ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="desglose-item">
+                    <span>Tarifa de servicio</span>
+                    <span id="tarifa_servicio">$0.00</span>
+                </div>
+                <div class="desglose-total">
+                    <span>Total</span>
+                    <span id="total_reserva">$0.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Evaluaciones -->
+    <?php if ($totalEvaluaciones > 0): ?>
+    <div class="info-evaluaciones">
+        <div class="evaluaciones-header">
+            <i class="fas fa-star fa-2x"></i>
+            <div>
+                <div class="evaluaciones-score"><?php echo $rating; ?></div>
+                <div class="evaluaciones-title">Favorito entre huéspedes</div>
+                <div class="evaluaciones-subtitle"><?php echo $totalEvaluaciones; ?> evaluaciones</div>
+            </div>
+        </div>
+
+        <!-- Barras de calificación -->
+        <div class="evaluaciones-barras">
+            <div class="barra-item">
+                <span class="barra-label">Limpieza</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_limpieza'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_limpieza'] ?? 5, 1); ?></span>
+            </div>
+            <div class="barra-item">
+                <span class="barra-label">Veracidad</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_veracidad'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_veracidad'] ?? 5, 1); ?></span>
+            </div>
+            <div class="barra-item">
+                <span class="barra-label">Llegada</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_llegada'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_llegada'] ?? 5, 1); ?></span>
+            </div>
+            <div class="barra-item">
+                <span class="barra-label">Comunicación</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_comunicacion'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_comunicacion'] ?? 5, 1); ?></span>
+            </div>
+            <div class="barra-item">
+                <span class="barra-label">Ubicación</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_ubicacion'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_ubicacion'] ?? 5, 1); ?></span>
+            </div>
+            <div class="barra-item">
+                <span class="barra-label">Calidad-precio</span>
+                <div class="barra-progress">
+                    <div class="barra-fill" style="width: <?php echo ($estadisticas['promedio_calidad_precio'] ?? 5) * 20; ?>%"></div>
+                </div>
+                <span class="barra-value"><?php echo number_format($estadisticas['promedio_calidad_precio'] ?? 5, 1); ?></span>
+            </div>
+        </div>
+
+        <!-- Lista de reseñas -->
+        <div class="evaluaciones-lista">
+            <?php foreach ($evaluaciones as $evaluacion): ?>
+            <div class="evaluacion-item">
+                <div class="evaluacion-header">
+                    <div class="evaluacion-avatar">
+                        <img src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/person_1.jpg" alt="Usuario">
+                    </div>
+                    <div class="evaluacion-info">
+                        <h4><?php echo htmlspecialchars($evaluacion['nombre_usuario']); ?></h4>
+                        <p><?php echo date('F Y', strtotime($evaluacion['fecha_evaluacion'])); ?></p>
+                    </div>
+                </div>
+                <p class="evaluacion-texto">
+                    <?php echo htmlspecialchars($evaluacion['comentario']); ?>
+                </p>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Mapa -->
+    <div class="info-mapa">
+        <h3>Dónde vas a estar</h3>
+        <p class="ubicacion-texto"><?php echo htmlspecialchars($propiedad['direccion'] ?? 'Tecolutla, Veracruz, México'); ?></p>
+        <!-- IMPORTANTE: altura inline para garantizar que Leaflet renderice correctamente -->
+        <div class="mapa-container" id="mapa" style="height: 400px; width: 100%; min-height: 400px;"></div>
+    </div>
+</div>
+
+<!-- Modal Galería -->
+<div class="modal-galeria" id="modalGaleria">
+    <div class="modal-galeria-header">
+        <button class="modal-galeria-close" onclick="cerrarGaleria()">
+            <i class="fas fa-times"></i>
+        </button>
+        <span id="galeriaCounter">1 / <?php echo max(1, count($fotos)); ?></span>
+        <div></div>
+    </div>
+    <div class="modal-galeria-content">
+        <div class="modal-galeria-grid" id="galeriaGrid">
+            <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<?php include_once 'views/template/footer-principal.php'; ?>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// Variables globales para esta página (base_url ya está definida en footer)
+const propiedadId = <?php echo $propiedad['id']; ?>;
+const precioNoche = <?php echo $precioNoche; ?>;
+const tarifaLimpieza = <?php echo $tarifaLimpieza; ?>;
+const latitud = <?php echo !empty($propiedad['latitud']) ? floatval($propiedad['latitud']) : 20.4833; ?>;
+const longitud = <?php echo !empty($propiedad['longitud']) ? floatval($propiedad['longitud']) : -97.0167; ?>;
+
+// Fotos para la galería
+const fotos = [
+    '<?php echo $fotoPrincipal; ?>',
+    <?php foreach ($fotos as $foto): ?>
+    '<?php echo RUTA_PRINCIPAL . 'assets/principal/images/propiedades/' . $foto['url_imagen']; ?>',
+    <?php endforeach; ?>
+];
+
+// Inicialización
+document.addEventListener('DOMContentLoaded', function() {
+    initMapa();
+    initCalculadorPrecios();
+});
+
+// Inicializar mapa
+function initMapa() {
+    const contenedorMapa = document.getElementById('mapa');
+    
+    // Verificar que el contenedor existe
+    if (!contenedorMapa) {
+        console.error('❌ Contenedor del mapa no encontrado');
+        return;
+    }
+    
+    // Verificar que Leaflet está cargado
+    if (typeof L === 'undefined') {
+        console.error('❌ Leaflet no está cargado');
+        return;
+    }
+    
+    // Validar coordenadas
+    const lat = parseFloat(latitud) || 20.4833;
+    const lng = parseFloat(longitud) || -97.0167;
+    
+    console.log('🗺️ Inicializando mapa en:', lat, lng);
+    
+    try {
+        // Crear el mapa
+        const map = L.map('mapa', {
+            center: [lat, lng],
+            zoom: 14,
+            scrollWheelZoom: false // Evitar zoom accidental al hacer scroll
+        });
+        
+        // Agregar capa de OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+        
+        // Círculo aproximado (estilo Airbnb - ubicación aproximada)
+        L.circle([lat, lng], {
+            color: '#FF385C',
+            fillColor: '#FF385C',
+            fillOpacity: 0.2,
+            radius: 300,
+            weight: 2
+        }).addTo(map);
+        
+        // Marcador central
+        const marcador = L.marker([lat, lng]).addTo(map);
+        marcador.bindPopup('<strong><?php echo addslashes($propiedad["estilo"]); ?></strong><br><?php echo addslashes($propiedad["direccion"] ?? "Tecolutla, Veracruz"); ?>');
+        
+        // Forzar redimensionado del mapa después de cargarlo (solución para el problema de altura)
+        setTimeout(function() {
+            map.invalidateSize();
+            console.log('✅ Mapa redimensionado correctamente');
+        }, 250);
+        
+        console.log('✅ Mapa inicializado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error al inicializar el mapa:', error);
+        contenedorMapa.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;"><i class="fas fa-map-marker-alt" style="font-size:48px;margin-right:16px;"></i><span>No se pudo cargar el mapa</span></div>';
+    }
+}
+
+// Calculador de precios
+function initCalculadorPrecios() {
+    const fechaLlegada = document.getElementById('fecha_llegada');
+    const fechaSalida = document.getElementById('fecha_salida');
+    
+    fechaLlegada.addEventListener('change', calcularPrecio);
+    fechaSalida.addEventListener('change', calcularPrecio);
+    
+    // Si hay fechas precargadas, calcular
+    if (fechaLlegada.value && fechaSalida.value) {
+        calcularPrecio();
+    }
+}
+
+function calcularPrecio() {
+    const fechaLlegada = new Date(document.getElementById('fecha_llegada').value);
+    const fechaSalida = new Date(document.getElementById('fecha_salida').value);
+    
+    if (isNaN(fechaLlegada) || isNaN(fechaSalida) || fechaSalida <= fechaLlegada) {
+        document.getElementById('desglose').style.display = 'none';
+        return;
+    }
+    
+    // Calcular noches
+    const diffTime = Math.abs(fechaSalida - fechaLlegada);
+    const noches = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Calcular precios
+    const subtotalNoches = precioNoche * noches;
+    const tarifaServicio = subtotalNoches * 0.12; // 12% tarifa de servicio
+    const total = subtotalNoches + tarifaLimpieza + tarifaServicio;
+    
+    // Actualizar UI
+    document.getElementById('num_noches').textContent = noches;
+    document.getElementById('subtotal_noches').textContent = '$' + subtotalNoches.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('tarifa_servicio').textContent = '$' + tarifaServicio.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('total_reserva').textContent = '$' + total.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    
+    document.getElementById('desglose').style.display = 'block';
+}
+
+// Iniciar reserva
+function iniciarReserva() {
+    const fechaLlegada = document.getElementById('fecha_llegada').value;
+    const fechaSalida = document.getElementById('fecha_salida').value;
+    const numHuespedes = document.getElementById('num_huespedes').value;
+    
+    if (!fechaLlegada || !fechaSalida) {
+        Swal.fire('Error', 'Por favor selecciona las fechas de llegada y salida', 'warning');
+        return;
+    }
+    
+    <?php if (!isset($_SESSION['id_usuario'])): ?>
+        window.location.href = base_url + 'login?redirect=' + encodeURIComponent(window.location.href);
+        return;
+    <?php endif; ?>
+    
+    // Redirigir a la página de reserva
+    const params = new URLSearchParams({
+        habitacion: propiedadId,
+        f_llegada: fechaLlegada,
+        f_salida: fechaSalida,
+        huespedes: numHuespedes
+    });
+    
+    window.location.href = base_url + 'reserva/verify?' + params.toString();
+}
+
+// Toggle favorito
+function toggleFavorito(id) {
+    <?php if (!isset($_SESSION['id_usuario'])): ?>
+        window.location.href = base_url + 'login';
+        return;
+    <?php endif; ?>
+    
+    fetch(base_url + 'propiedad/toggleFavorito', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'id_habitacion=' + id
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.tipo === 'success') {
+            Swal.fire('', data.msg, 'success');
+        }
+    });
+}
+
+// Compartir
+function compartir() {
+    if (navigator.share) {
+        navigator.share({
+            title: '<?php echo addslashes($propiedad['estilo']); ?>',
+            text: 'Mira esta increíble casa vacacional en Tecolutla',
+            url: window.location.href
+        });
+    } else {
+        // Copiar al portapapeles
+        navigator.clipboard.writeText(window.location.href);
+        Swal.fire('', 'Enlace copiado al portapapeles', 'success');
+    }
+}
+
+// Galería
+function abrirGaleria(index = 0) {
+    const modal = document.getElementById('modalGaleria');
+    const grid = document.getElementById('galeriaGrid');
+    
+    // Llenar galería
+    grid.innerHTML = fotos.map((foto, i) => 
+        `<img src="${foto}" alt="Foto ${i + 1}" onclick="verFoto(${i})" onerror="this.src='${base_url}assets/principal/images/default-casa.jpg'">`
+    ).join('');
+    
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarGaleria() {
+    document.getElementById('modalGaleria').classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Toggle descripción
+function toggleDescripcion() {
+    const texto = document.getElementById('descripcionTexto');
+    texto.style.maxHeight = texto.style.maxHeight ? '' : 'none';
+}
+
+// Toggle huéspedes
+function toggleHuespedes() {
+    Swal.fire({
+        title: 'Número de huéspedes',
+        input: 'number',
+        inputValue: document.getElementById('num_huespedes').value,
+        inputAttributes: {
+            min: 1,
+            max: <?php echo $propiedad['capacidad']; ?>
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            const num = Math.min(Math.max(1, result.value), <?php echo $propiedad['capacidad']; ?>);
+            document.getElementById('num_huespedes').value = num;
+            document.getElementById('huespedes_texto').textContent = num + ' huésped' + (num > 1 ? 'es' : '');
+        }
+    });
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        cerrarGaleria();
+    }
+});
+</script>
+
+</body>
+</html>

@@ -62,7 +62,7 @@ include_once 'views/template/header-principal.php';
                 <figure class="img-absolute">
                     <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/logodefinitivo.png" alt="Image" class="img-fluid">
                 </figure>
-                <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-2.jpg" alt="Image" class="img-fluid rounded">
+                <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-3.jpg" alt="Casa Vacacional Via-Mar" class="img-fluid rounded">
             </div>
             <div class="col-md-12 col-lg-4 order-lg-1" data-aos="fade-up">
                 <h2 class="heading">Bienvenido a casa en Tecolutla, Veracruz!</h2>
@@ -73,155 +73,84 @@ include_once 'views/template/header-principal.php';
     </div>
 </section>
 
-<!-- VIA SOL section -->
-<section class="section slider-section bg-light">
+<!-- CATÁLOGO DE CASAS VACACIONALES ESTILO AIRBNB -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="<?php echo RUTA_PRINCIPAL; ?>assets/principal/css/airbnb-style.css">
+
+<section class="section bg-light py-5">
     <div class="container">
         <div class="row justify-content-center text-center mb-5">
             <div class="col-md-7">
-                <h2 class="heading" data-aos="fade-up">CASA VIA-SOL</h2>
-                <p data-aos="fade-up" data-aos-delay="100">¡No esperes más! Reserve su estancia con nosotros y experimente unas vacaciones de ensueño en nuestra casa de lujo. ¡Haremos que cada momento cuente!</p>
+                <h2 class="heading" data-aos="fade-up">NUESTRAS CASAS VACACIONALES</h2>
+                <p data-aos="fade-up" data-aos-delay="100">Descubre nuestras opciones de alojamiento y elige la perfecta para tus vacaciones</p>
             </div>
         </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="home-slider major-caousel owl-carousel mb-5" data-aos="fade-up" data-aos-delay="200">
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs1.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs1.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs2.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs2.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs3.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs3.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs4.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs4.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs5.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs5.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs6.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs6.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs7.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/vs7.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
+        
+        <!-- Grid de Propiedades Airbnb -->
+        <div class="propiedades-grid" data-aos="fade-up">
+            <?php if (!empty($data['propiedades'])): ?>
+                <?php foreach ($data['propiedades'] as $propiedad): ?>
+                    <?php 
+                    $rutaImagen = obtenerRutaImagenCasa($propiedad['foto']);
+                    $rating = number_format($propiedad['rating'] ?? $propiedad['calificacion_promedio'] ?? 0, 1);
+                    $numEvaluaciones = $propiedad['num_evaluaciones'] ?? $propiedad['total_evaluaciones'] ?? 0;
+                    $esFavorito = !empty($propiedad['es_favorito_huespedes']);
+                    ?>
+                    <a href="<?php echo RUTA_PRINCIPAL . 'propiedad/detalle/' . $propiedad['id']; ?>" class="propiedad-card">
+                        <!-- Imagen -->
+                        <div class="propiedad-card-image">
+                            <?php if ($esFavorito): ?>
+                                <span class="badge-favorito">
+                                    <i class="fas fa-award me-1"></i>Favorito entre huéspedes
+                                </span>
+                            <?php endif; ?>
+                            
+                            <img src="<?php echo $rutaImagen; ?>" 
+                                 alt="<?php echo htmlspecialchars($propiedad['estilo']); ?>"
+                                 onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'">
+                        </div>
+                        
+                        <!-- Info de la propiedad -->
+                        <div class="propiedad-card-info">
+                            <div class="propiedad-card-header">
+                                <h3 class="propiedad-card-location">
+                                    <?php echo htmlspecialchars($propiedad['estilo']); ?>
+                                </h3>
+                                <?php if ($rating > 0): ?>
+                                    <div class="propiedad-card-rating">
+                                        <i class="fas fa-star"></i>
+                                        <span><?php echo $rating; ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <p class="propiedad-card-title">Casa vacacional en Tecolutla</p>
+                            
+                            <p class="propiedad-card-details">
+                                <?php echo $propiedad['capacidad']; ?> huéspedes · 
+                                <?php echo $propiedad['habitaciones_num'] ?? 1; ?> habitación · 
+                                <?php echo $propiedad['camas'] ?? 1; ?> cama · 
+                                <?php echo $propiedad['banos'] ?? 1; ?> baño
+                            </p>
+                            
+                            <p class="propiedad-card-price">
+                                <strong>$<?php echo number_format($propiedad['precio'], 0); ?> MXN</strong>
+                                <span>por noche</span>
+                            </p>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-home fa-4x text-muted mb-3"></i>
+                    <h3>No hay propiedades disponibles</h3>
+                    <p class="text-muted">Pronto agregaremos más casas vacacionales.</p>
                 </div>
-                <!-- END slider -->
-            </div>
-
-            <div class="row justify-content-center text-center mb-5">
-                <h2 class="heading" data-aos="fade-up">EXCELENTE UBICACIÓN</h2>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3737.659085721147!2d-97.01701732475831!3d20.47919078103624!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMjDCsDI4JzQ1LjEiTiA5N8KwMDAnNTIuMCJX!5e0!3m2!1ses!2smx!4v1744310533580!5m2!1ses!2smx" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-
+            <?php endif; ?>
         </div>
     </div>
 </section>
-<!-- END section -->
-
-<section class="section">
-    <div class="container">
-        <div class="row justify-content-center text-center mb-5">
-            <div class="col-md-7">
-                <h2 class="heading" data-aos="fade-up">CASA VACACIONAL</h2>
-                <p data-aos="fade-up" data-aos-delay="100">
-                    ¡Bienvenidos a su escapada tropical de ensueño! 🌴 Descubra el encanto del paraíso en nuestra casa de vacaciones recién inaugurada, diseñada con todo lo necesario para un alojamiento de lujo.
-                    La casa vacacional es cómoda y luminosa, con un estilo moderno minimalista y una cama doble lista para hacer realidad tus sueños. En mi hogar encontrarás la privacidad que necesitas, complementada con una guía local que te permitirá Saber Adónde Ir.</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6 col-lg-4" data-aos="fade-up">
-                <a href="#" class="room">
-                    <figure class="img-wrap">
-                        <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-18.jpg" alt="Free website template" class="img-fluid mb-3">
-                    </figure>
-                    <div class="p-3 text-center room-info">
-                        <h2>COCINA</h2>
-                        <span class="text-uppercase letter-spacing-1 text-navy">Inicie el día con una ducha refrescante en uno de nuestros 2 baños completos 🚽🚿, equipados con agua fría y caliente para adaptarse a su gusto. Prepare deliciosos desayunos en nuestra cocina totalmente equipada 🍴🥄🔪, y disfrute de sus comidas en nuestra sala de estar o comedor, diseñados para crear momentos inolvidables. </span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4" data-aos="fade-up">
-                <a href="#" class="room">
-                    <figure class="img-wrap">
-                        <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-17.jpg" alt="Free website template" class="img-fluid mb-3">
-                    </figure>
-                    <div class="p-3 text-center room-info">
-                        <h2>SALA</h2>
-                        <span class="text-uppercase letter-spacing-1">Manténgase conectado con nuestro wifi de alta velocidad 🌐, y disfrute de noches de cine con nuestro TV equipado con cable y Netflix 📺. Relájese y refrésquese en nuestra piscina privada 🏊, y deje que los más pequeños se diviertan en el chapoteadero. </span>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4" data-aos="fade-up">
-                <a href="#" class="room">
-                    <figure class="img-wrap">
-                        <img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-9.jpg" alt="Free website template" class="img-fluid mb-3">
-                    </figure>
-                    <div class="p-3 text-center room-info">
-                        <h2>HABITACIÓNES</h2>
-                        <span class="text-uppercase letter-spacing-1">Imagínese despertando en una de nuestras 3 recámaras climatizadas 🥶, cada una equipada con ventilador de techo y TV para su máximo confort. Ofrecemos un alojamiento flexible con 6 cómodas camas matrimoniales y 2 camas individuales, perfectas para familias o grupos de amigos. </span>
-                    </div>
-                </a>
-            </div>
-
-
-        </div>
-    </div>
-</section>
-
-
-<section class="section slider-section bg-light">
-    <div class="container">
-        <div class="row justify-content-center text-center mb-5">
-            <div class="col-md-7">
-                <h2 class="heading" data-aos="fade-up">FOTOS</h2>
-                <p data-aos="fade-up" data-aos-delay="100">¡No esperes más! Reserve su estancia con nosotros y experimente unas vacaciones de ensueño en nuestra casa de lujo. ¡Haremos que cada momento cuente!</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="home-slider major-caousel owl-carousel mb-5" data-aos="fade-up" data-aos-delay="200">
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-2.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-2.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-6.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-6.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-8.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-8.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-18.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-18.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-14.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-14.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-15.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-15.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                    <div class="slider-item">
-                        <a href="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-21.jpg" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/principal/'; ?>images/Casaviamar-21.jpg" alt="Image placeholder" class="img-fluid"></a>
-                    </div>
-                </div>
-                <!-- END slider -->
-            </div>
-
-            <div class="row justify-content-center text-center mb-5">
-                <h2 class="heading" data-aos="fade-up">EXCELENTE UBICACIÓN</h2>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7475.34562564853!2d-97.0232328772545!3d20.478627336806582!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85dbb58e5cd30b3f%3A0xb2f30f5191f326e8!2sCasa%20vacacional!5e0!3m2!1ses!2smx!4v1690456157058!5m2!1ses!2smx" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</section>
-<!-- END section -->
+<!-- FIN CATÁLOGO AIRBNB -->
 
 
 
@@ -307,40 +236,6 @@ include_once 'views/template/header-principal.php';
 
     </div>
 </section>
-
-<section class="section slider-section bg-light">
-    <div class="container">
-        <div class="row justify-content-center text-center mb-5">
-            <div class="col-md-7">
-                <h2 class="heading" data-aos="fade-up">NUESTROS HUESPEDES</h2>
-                <p data-aos="fade-up" data-aos-delay="100">Cada experiencia vivida en nuestra casa es única y especial. Capturamos momentos inolvidables de nuestros huéspedes para compartir la magia de su estancia. Explore nuestra galería y sea testigo de las sonrisas, aventuras y recuerdos que hacen de nuestro sitio el lugar perfecto para sus vacaciones. ¡Su próxima historia puede estar aquí!</p>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-12">
-                <div class="home-slider major-caousel owl-carousel mb-5" data-aos="fade-up" data-aos-delay="200">
-                    <?php foreach ($data['sliders'] as $slider) { ?>
-                        <div class="slider-item">
-                            <a href="<?php echo RUTA_PRINCIPAL . 'assets/img/sliders/' . $slider['foto'] ?>" data-fancybox="images" data-caption="Caption for this image"><img src="<?php echo RUTA_PRINCIPAL . 'assets/img/sliders/' . $slider['foto'] ?>" alt="Image placeholder" class="img-fluid"></a>
-                        </div>
-                    <?php } ?>
-
-                </div>
-                <!-- END slider -->
-            </div>
-
-            <div class="row justify-content-center text-center mb-5">
-                <h2 class="heading" data-aos="fade-up">EXCELENTE UBICACIÓN</h2>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7475.34562564853!2d-97.0232328772545!3d20.478627336806582!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x85dbb58e5cd30b3f%3A0xb2f30f5191f326e8!2sCasa%20vacacional!5e0!3m2!1ses!2smx!4v1690456157058!5m2!1ses!2smx" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</section>
-<!-- END section -->
-
 
 <section class="section blog-post-entry bg-light">
     <div class="container">

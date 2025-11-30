@@ -1,80 +1,28 @@
 <?php
-class PrincipalModel extends Query
+class PropiedadModel extends Query
 {
-
     public function __construct()
     {
         parent::__construct();
     }
 
-    // RECUPERAR LOS SLIDERS
-
-    public function getSliders()
-    {
-
-        return  $this->selectAll("SELECT * FROM sliders");
-    }
-
-    // RECUPERAR LAS HABITACIONES
-
-    public function getHabitaciones()
-    {
-        return  $this->selectAll("SELECT * FROM habitaciones WHERE estado = 1");
-    }
-
-    // ==================== MÉTODOS PARA CATÁLOGO AIRBNB ====================
-    
-    public function getCasasParaCatalogo($filtros = [])
-    {
-        $sql = "SELECT h.*, 
-                h.foto as foto_principal,
-                h.calificacion_promedio as rating,
-                h.total_evaluaciones as num_evaluaciones
-                FROM habitaciones h 
-                WHERE h.estado = 1";
-        
-        $params = [];
-        
-        // Filtros opcionales
-        if (!empty($filtros['capacidad_min'])) {
-            $sql .= " AND h.capacidad >= ?";
-            $params[] = $filtros['capacidad_min'];
-        }
-        
-        if (!empty($filtros['precio_max'])) {
-            $sql .= " AND h.precio <= ?";
-            $params[] = $filtros['precio_max'];
-        }
-        
-        if (!empty($filtros['habitaciones'])) {
-            $sql .= " AND h.habitaciones_num >= ?";
-            $params[] = $filtros['habitaciones'];
-        }
-        
-        $sql .= " ORDER BY h.es_favorito_huespedes DESC, h.calificacion_promedio DESC, h.fecha DESC";
-        
-        return empty($params) ? $this->selectAll($sql) : $this->selectAll($sql, $params);
-    }
-
+    // Obtener detalle completo de una propiedad
     public function getCasaDetalle($id)
     {
         $sql = "SELECT h.* FROM habitaciones h WHERE h.id = ? AND h.estado = 1";
         $casa = $this->select($sql, [$id]);
         
         if ($casa) {
-            // Obtener fotos adicionales
             $casa['fotos'] = $this->getFotosPropiedad($id);
-            // Obtener amenidades
             $casa['amenidades'] = $this->getAmenidadesPropiedad($id);
-            // Obtener evaluaciones
             $casa['evaluaciones'] = $this->getEvaluacionesPropiedad($id, 5);
-            // Obtener estadísticas
             $casa['estadisticas'] = $this->getEstadisticasEvaluaciones($id);
         }
         
         return $casa;
     }
 
+    // Obtener propiedad por slug
     public function getCasaDetalleBySlug($slug)
     {
         $sql = "SELECT h.* FROM habitaciones h WHERE h.slug = ? AND h.estado = 1";
@@ -90,6 +38,7 @@ class PrincipalModel extends Query
         return $casa;
     }
 
+    // Obtener fotos de una propiedad
     public function getFotosPropiedad($id_habitacion)
     {
         $sql = "SELECT * FROM fotos_propiedad WHERE id_habitacion = ? ORDER BY es_principal DESC, orden ASC";
@@ -97,6 +46,7 @@ class PrincipalModel extends Query
         return $result ? $result : [];
     }
 
+    // Obtener amenidades de una propiedad
     public function getAmenidadesPropiedad($id_habitacion)
     {
         $sql = "SELECT a.* FROM amenidades a 
@@ -107,6 +57,7 @@ class PrincipalModel extends Query
         return $result ? $result : [];
     }
 
+    // Obtener evaluaciones de una propiedad
     public function getEvaluacionesPropiedad($id_habitacion, $limite = 10)
     {
         $sql = "SELECT e.*, u.nombre as nombre_usuario
@@ -119,6 +70,7 @@ class PrincipalModel extends Query
         return $result ? $result : [];
     }
 
+    // Obtener estadísticas de evaluaciones
     public function getEstadisticasEvaluaciones($id_habitacion)
     {
         $sql = "SELECT 
@@ -164,7 +116,8 @@ class PrincipalModel extends Query
         $sql = "SELECT fecha_ingreso, fecha_salida FROM reservas 
                 WHERE id_habitacion = ? AND estado = 1 AND fecha_salida >= CURDATE()
                 ORDER BY fecha_ingreso";
-        return $this->selectAll($sql, [$id_habitacion]);
+        $result = $this->selectAll($sql, [$id_habitacion]);
+        return $result ? $result : [];
     }
 
     // Agregar a favoritos
@@ -197,6 +150,7 @@ class PrincipalModel extends Query
                 INNER JOIN favoritos f ON h.id = f.id_habitacion
                 WHERE f.id_usuario = ? AND h.estado = 1
                 ORDER BY f.fecha_agregado DESC";
-        return $this->selectAll($sql, [$id_usuario]);
+        $result = $this->selectAll($sql, [$id_usuario]);
+        return $result ? $result : [];
     }
 }

@@ -54,40 +54,64 @@ function handleServerResponse(response) {
     });
 }
 
+// Variable global para ID de casa en edición
+let casaIdActual = null;
+let fotosGaleriaActuales = [];
+
 // Inicialización del DOM
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Inicializando Gestión de Casas...');
+    console.log('🚀 Inicializando Gestión de Casas Extendida...');
     console.log('Base URL:', base_url);
     
     // Cargar casas iniciales
     cargarCasas();
     
-    // Event listeners
-    $('#btnNuevaCasa, #btnPrimeraCasa').on('click', abrirModalNuevaCasa);
-    $('#btnGuardarCasa').on('click', guardarCasa);
-    $('#buscarCasa').on('input', filtrarCasas);
-    $('#filtroEstado').on('change', filtrarCasas);
+    // Event listeners principales
+    $(document).on('click', '#btnNuevaCasa, #btnPrimeraCasa', abrirModalNuevaCasa);
+    $(document).on('click', '#btnGuardarCasa', guardarCasa);
+    $(document).on('input', '#buscarCasa', filtrarCasas);
+    $(document).on('change', '#filtroEstado', filtrarCasas);
     
-    // Event listeners para gestión de imágenes
-    $('#btnSubirImagen').on('click', subirImagen);
-    $('#btnEliminarImagen').on('click', eliminarImagenActual);
-    $('#inputImagen').on('change', previsualizarImagen);
+    // Event listeners para gestión de imagen principal (usar delegación)
+    $(document).on('click', '#btnSubirImagen', subirImagen);
+    $(document).on('click', '#btnEliminarImagen', eliminarImagenActual);
+    $(document).on('change', '#inputImagen', previsualizarImagen);
+    
+    // Event listeners para galería múltiple
+    $(document).on('click', '#btnSubirGaleria', subirFotosGaleria);
+    $(document).on('change', '#inputGaleria', validarMaximoFotos);
+    
+    // Event listener para verificar mapa
+    $(document).on('click', '#btnVerificarMapa', function(e) {
+        e.preventDefault();
+        console.log('🗺️ Botón Ver Mapa clickeado');
+        verificarMapa();
+    });
+    
+    // Event listener para preview de video
+    $(document).on('blur', '#video', previsualizarVideo);
     
     // Limpiar formulario al cerrar modal
     $('#modalCasa').on('hidden.bs.modal', limpiarFormulario);
     
     // Auto-generar slug cuando se escribe el nombre
-    $('#estilo').on('input', function() {
-        if ($('#slug').val() === '') {
-            const slug = $(this).val().toLowerCase()
-                .replace(/[^a-z0-9\s-]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/-+/g, '-')
-                .trim('-');
-            $('#slug').val(slug);
-        }
+    $(document).on('input', '#estilo', function() {
+        const slug = generarSlug($(this).val());
+        $('#slug').val(slug);
     });
+    
+    console.log('✅ Event listeners configurados correctamente');
 });
+
+// Función para generar slug
+function generarSlug(texto) {
+    return texto.toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Eliminar acentos
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim('-') || '';
+}
 
 // Función para cargar todas las casas
 function cargarCasas() {
@@ -231,10 +255,28 @@ function limpiarFormulario() {
     $('#formCasa')[0].reset();
     $('#casaId').val('');
     $('#inputImagen').val('');
+    $('#inputGaleria').val('');
     $('#imagenPreview').hide();
     $('#imagenActual').attr('src', '');
     $('#nombreImagenActual').text('');
+    $('#galeriaFotosContainer').empty();
+    $('#mapaPreview').hide();
+    $('#videoPreview').hide();
+    $('#alertaMaxFotos').hide();
+    $('#contadorFotos').text('0/10 fotos');
+    $('#subirGaleriaContainer').show();
     modoEdicion = false;
+    casaIdActual = null;
+    fotosGaleriaActuales = [];
+    
+    // Resetear valores por defecto
+    $('#habitaciones_num').val(1);
+    $('#camas').val(1);
+    $('#banos').val(1);
+    $('#estado').val(1);
+    
+    // Volver a la primera pestaña
+    $('#general-tab').tab('show');
 }
 
 // Función para ver detalles de una casa
@@ -282,8 +324,9 @@ function editarCasa(id) {
     .then(data => {
         if (data && data.id) {
             modoEdicion = true;
+            casaIdActual = data.id;
             
-            // Llenar formulario con datos de la casa
+            // Llenar formulario con datos básicos
             $('#casaId').val(data.id);
             $('#estilo').val(data.estilo);
             $('#numero').val(data.numero);
@@ -295,8 +338,29 @@ function editarCasa(id) {
             $('#precio').val(data.precio);
             $('#estado').val(data.estado);
             
-            // Mostrar imagen actual si existe
+            // Llenar campos extendidos
+            $('#habitaciones_num').val(data.habitaciones_num || 1);
+            $('#camas').val(data.camas || 1);
+            $('#banos').val(data.banos || 1);
+            $('#direccion').val(data.direccion || '');
+            $('#latitud').val(data.latitud || '');
+            $('#longitud').val(data.longitud || '');
+            
+            // Mostrar imagen principal si existe
             mostrarImagenActual(data.foto);
+            
+            // Cargar galería de fotos
+            cargarGaleriaFotos(data.id);
+            
+            // Mostrar preview del mapa si hay coordenadas
+            if (data.latitud && data.longitud) {
+                mostrarMapa(data.latitud, data.longitud);
+            }
+            
+            // Mostrar preview de video si existe
+            if (data.video) {
+                previsualizarVideo();
+            }
             
             // Cambiar título del modal
             $('#modalCasaTitle').html('<i class="fas fa-edit me-2"></i>Editar Casa Vacacional');
@@ -324,20 +388,29 @@ function guardarCasa() {
     
     console.log('💾 Guardando casa...', modoEdicion ? 'Editando' : 'Creando');
     
+    // Debug: mostrar todos los datos del formulario
+    console.log('📋 Datos del formulario:');
+    for (let pair of formData.entries()) {
+        console.log('  ' + pair[0] + ': ' + pair[1]);
+    }
+    
     // Validaciones básicas
     if (!formData.get('estilo') || !formData.get('numero') || !formData.get('capacidad') || 
         !formData.get('precio') || !formData.get('descripcion')) {
         alertSW('Por favor completa todos los campos obligatorios', 'warning');
+        $('#general-tab').tab('show'); // Ir a la pestaña General
         return;
     }
     
     if (parseFloat(formData.get('precio')) <= 0) {
         alertSW('El precio debe ser mayor a 0', 'warning');
+        $('#general-tab').tab('show');
         return;
     }
     
     if (parseInt(formData.get('capacidad')) <= 0) {
         alertSW('La capacidad debe ser mayor a 0', 'warning');
+        $('#general-tab').tab('show');
         return;
     }
     
@@ -360,6 +433,11 @@ function guardarCasa() {
         console.log('📥 Respuesta del servidor:', data);
         
         if (data.tipo === 'success') {
+            // Si es nueva casa y hay ID, actualizar para poder subir fotos
+            if (!modoEdicion && data.id_casa) {
+                casaIdActual = data.id_casa;
+            }
+            
             alertSW(data.msg, 'success');
             $('#modalCasa').modal('hide');
             cargarCasas(); // Recargar la lista
@@ -606,4 +684,333 @@ function ejecutarEliminacionImagen(nombreArchivo) {
         console.error('❌ Error de red:', error);
         alertSW('Error de conexión al eliminar la imagen', 'error');
     });
+}
+
+// ==================== FUNCIONES PARA GALERÍA MÚLTIPLE ====================
+
+// Validar máximo de fotos al seleccionar
+function validarMaximoFotos() {
+    const input = document.getElementById('inputGaleria');
+    const cantidadActual = fotosGaleriaActuales.length;
+    const espacioDisponible = 10 - cantidadActual;
+    
+    if (input.files.length > espacioDisponible) {
+        alertSW(`Solo puedes seleccionar ${espacioDisponible} foto(s) más. Tienes ${cantidadActual} de 10.`, 'warning');
+        input.value = '';
+        return false;
+    }
+    return true;
+}
+
+// Cargar galería de fotos existentes
+function cargarGaleriaFotos(id_habitacion) {
+    console.log('📸 Cargando galería para casa ID:', id_habitacion);
+    
+    fetch(base_url + 'getFotosPropiedad?id=' + id_habitacion, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(handleServerResponse)
+    .then(data => {
+        if (data.tipo === 'success' && data.fotos) {
+            fotosGaleriaActuales = data.fotos;
+            renderizarGaleria(data.fotos);
+            actualizarContadorFotos(data.fotos.length);
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error al cargar galería:', error);
+    });
+}
+
+// Renderizar galería de fotos
+function renderizarGaleria(fotos) {
+    const container = document.getElementById('galeriaFotosContainer');
+    container.innerHTML = '';
+    
+    if (fotos.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center text-muted py-3"><i class="fas fa-images me-2"></i>No hay fotos en la galería</div>';
+        return;
+    }
+    
+    const rutaBase = window.location.origin + 
+        (window.location.pathname.includes('casasviamar') ? '/casasviamar' : '') + 
+        '/assets/principal/images/propiedades/';
+    
+    fotos.forEach(foto => {
+        const html = `
+            <div class="col-md-3 col-sm-4 col-6" id="foto-${foto.id}">
+                <div class="card h-100">
+                    <img src="${rutaBase}${foto.url_imagen}" class="card-img-top" 
+                         style="height: 120px; object-fit: cover;" 
+                         onerror="this.src='${rutaBase}../default-casa.jpg'">
+                    <div class="card-body p-2 text-center">
+                        ${foto.es_principal == 1 ? 
+                            '<span class="badge bg-primary mb-1"><i class="fas fa-star me-1"></i>Principal</span>' : 
+                            `<button class="btn btn-outline-primary btn-sm mb-1" onclick="setPrincipal(${foto.id})">
+                                <i class="fas fa-star"></i>
+                            </button>`
+                        }
+                        <button class="btn btn-outline-danger btn-sm" onclick="eliminarFotoGaleria(${foto.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.innerHTML += html;
+    });
+}
+
+// Actualizar contador de fotos
+function actualizarContadorFotos(cantidad) {
+    $('#contadorFotos').text(`${cantidad}/10 fotos`);
+    
+    if (cantidad >= 10) {
+        $('#alertaMaxFotos').show();
+        $('#subirGaleriaContainer').hide();
+    } else {
+        $('#alertaMaxFotos').hide();
+        $('#subirGaleriaContainer').show();
+    }
+}
+
+// Subir fotos a la galería
+function subirFotosGaleria() {
+    const input = document.getElementById('inputGaleria');
+    
+    if (!input.files || input.files.length === 0) {
+        alertSW('Por favor selecciona al menos una imagen', 'warning');
+        return;
+    }
+    
+    if (!casaIdActual && !modoEdicion) {
+        alertSW('Primero debes guardar la casa antes de subir fotos a la galería', 'info');
+        return;
+    }
+    
+    const id_habitacion = casaIdActual || $('#casaId').val();
+    
+    if (!id_habitacion) {
+        alertSW('ID de propiedad no disponible', 'error');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('id_habitacion', id_habitacion);
+    
+    for (let i = 0; i < input.files.length; i++) {
+        formData.append('imagenes[]', input.files[i]);
+    }
+    
+    const btnSubir = document.getElementById('btnSubirGaleria');
+    const textoOriginal = btnSubir.innerHTML;
+    btnSubir.disabled = true;
+    btnSubir.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Subiendo...';
+    
+    console.log('📤 Subiendo fotos a galería...');
+    
+    fetch(base_url + 'subirFotosGaleria', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(handleServerResponse)
+    .then(data => {
+        console.log('📥 Respuesta de subida:', data);
+        
+        if (data.tipo === 'success') {
+            alertSW(data.msg, 'success');
+            $('#inputGaleria').val('');
+            cargarGaleriaFotos(id_habitacion);
+        } else {
+            alertSW(data.msg || 'Error al subir las fotos', data.tipo || 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error de red:', error);
+        alertSW('Error de conexión al subir las fotos', 'error');
+    })
+    .finally(() => {
+        btnSubir.disabled = false;
+        btnSubir.innerHTML = textoOriginal;
+    });
+}
+
+// Eliminar foto de la galería
+function eliminarFotoGaleria(id_foto) {
+    Swal.fire({
+        title: '¿Eliminar foto?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const formData = new FormData();
+            formData.append('id_foto', id_foto);
+            
+            fetch(base_url + 'eliminarFotoPropiedad', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(handleServerResponse)
+            .then(data => {
+                if (data.tipo === 'success') {
+                    $(`#foto-${id_foto}`).fadeOut(300, function() {
+                        $(this).remove();
+                        fotosGaleriaActuales = fotosGaleriaActuales.filter(f => f.id != id_foto);
+                        actualizarContadorFotos(fotosGaleriaActuales.length);
+                    });
+                    alertSW(data.msg, 'success');
+                } else {
+                    alertSW(data.msg || 'Error al eliminar la foto', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error:', error);
+                alertSW('Error de conexión', 'error');
+            });
+        }
+    });
+}
+
+// Establecer foto como principal
+function setPrincipal(id_foto) {
+    const id_habitacion = casaIdActual || $('#casaId').val();
+    
+    const formData = new FormData();
+    formData.append('id_foto', id_foto);
+    formData.append('id_habitacion', id_habitacion);
+    
+    fetch(base_url + 'setFotoPrincipal', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(handleServerResponse)
+    .then(data => {
+        if (data.tipo === 'success') {
+            alertSW(data.msg, 'success');
+            cargarGaleriaFotos(id_habitacion);
+        } else {
+            alertSW(data.msg || 'Error al establecer foto principal', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('❌ Error:', error);
+        alertSW('Error de conexión', 'error');
+    });
+}
+
+// ==================== FUNCIONES PARA MAPA ====================
+
+// Verificar y mostrar mapa
+function verificarMapa() {
+    const latitud = $('#latitud').val().trim();
+    const longitud = $('#longitud').val().trim();
+    
+    console.log('🗺️ Verificando mapa - Lat:', latitud, 'Lng:', longitud);
+    
+    if (!latitud || !longitud) {
+        alertSW('Por favor ingresa las coordenadas (latitud y longitud)', 'warning');
+        return;
+    }
+    
+    // Validar que sean números válidos
+    const lat = parseFloat(latitud);
+    const lng = parseFloat(longitud);
+    
+    if (isNaN(lat) || isNaN(lng)) {
+        alertSW('Las coordenadas deben ser números válidos', 'warning');
+        return;
+    }
+    
+    // Validar rangos de coordenadas
+    if (lat < -90 || lat > 90) {
+        alertSW('La latitud debe estar entre -90 y 90', 'warning');
+        return;
+    }
+    
+    if (lng < -180 || lng > 180) {
+        alertSW('La longitud debe estar entre -180 y 180', 'warning');
+        return;
+    }
+    
+    mostrarMapa(lat, lng);
+}
+
+// Mostrar mapa con coordenadas
+function mostrarMapa(lat, lng) {
+    // Abrir Google Maps en nueva pestaña
+    const googleMapsUrl = `https://www.google.com/maps?q=${lat},${lng}&z=17`;
+    window.open(googleMapsUrl, '_blank');
+    
+    // Mostrar preview embebido usando OpenStreetMap (no requiere API key)
+    const osmUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${lng-0.01},${lat-0.01},${lng+0.01},${lat+0.01}&layer=mapnik&marker=${lat},${lng}`;
+    $('#iframeMapa').attr('src', osmUrl);
+    $('#mapaPreview').show();
+    
+    console.log('✅ Mapa abierto para:', lat, lng);
+}
+
+// ==================== FUNCIONES PARA VIDEO ====================
+
+// Previsualizar video
+function previsualizarVideo() {
+    const videoUrl = $('#video').val();
+    
+    if (!videoUrl) {
+        $('#videoPreview').hide();
+        return;
+    }
+    
+    let embedUrl = '';
+    
+    // YouTube
+    if (videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be')) {
+        let videoId = '';
+        if (videoUrl.includes('youtube.com/watch')) {
+            const urlParams = new URLSearchParams(videoUrl.split('?')[1]);
+            videoId = urlParams.get('v');
+        } else if (videoUrl.includes('youtu.be/')) {
+            videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
+        }
+        if (videoId) {
+            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+        }
+    }
+    // Vimeo
+    else if (videoUrl.includes('vimeo.com')) {
+        const vimeoId = videoUrl.split('vimeo.com/')[1].split('/')[0];
+        if (vimeoId) {
+            embedUrl = `https://player.vimeo.com/video/${vimeoId}`;
+        }
+    }
+    
+    if (embedUrl) {
+        $('#iframeVideo').attr('src', embedUrl);
+        $('#videoPreview').show();
+    } else {
+        $('#videoPreview').hide();
+        if (videoUrl) {
+            alertSW('URL de video no reconocida. Usa YouTube o Vimeo.', 'info');
+        }
+    }
 }

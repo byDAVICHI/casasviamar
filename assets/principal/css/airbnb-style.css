@@ -1,0 +1,1091 @@
+/* =====================================================
+   ESTILOS AIRBNB - ALQUILER VACACIONAL
+   ===================================================== */
+
+:root {
+    --airbnb-primary: #FF385C;
+    --airbnb-primary-dark: #E31C5F;
+    --airbnb-secondary: #00A699;
+    --airbnb-dark: #222222;
+    --airbnb-gray: #717171;
+    --airbnb-light-gray: #DDDDDD;
+    --airbnb-background: #F7F7F7;
+    --airbnb-white: #FFFFFF;
+    --airbnb-star: #FFB400;
+    --airbnb-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    --airbnb-shadow-light: 0 2px 8px rgba(0,0,0,0.1);
+    --airbnb-border-radius: 12px;
+    --airbnb-transition: all 0.2s ease;
+}
+
+/* ==================== CATÁLOGO - CARDS ==================== */
+
+.catalogo-container {
+    padding: 24px 0;
+}
+
+.catalogo-header {
+    margin-bottom: 32px;
+}
+
+.catalogo-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--airbnb-dark);
+    margin-bottom: 8px;
+}
+
+.catalogo-subtitle {
+    font-size: 16px;
+    color: var(--airbnb-gray);
+}
+
+/* Grid de propiedades */
+.propiedades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .propiedades-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .propiedades-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .propiedades-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* Card de Propiedad */
+.propiedad-card {
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: var(--airbnb-transition);
+}
+
+.propiedad-card:hover {
+    transform: translateY(-4px);
+}
+
+.propiedad-card-image {
+    position: relative;
+    border-radius: var(--airbnb-border-radius);
+    overflow: hidden;
+    aspect-ratio: 1 / 0.95;
+}
+
+.propiedad-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.propiedad-card:hover .propiedad-card-image img {
+    transform: scale(1.05);
+}
+
+/* Badge Favorito */
+.badge-favorito {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--airbnb-white);
+    color: var(--airbnb-dark);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: var(--airbnb-shadow-light);
+    z-index: 2;
+}
+
+/* Botón Favorito (Corazón) */
+.btn-favorito {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 2;
+    padding: 8px;
+    transition: var(--airbnb-transition);
+}
+
+.btn-favorito svg {
+    width: 24px;
+    height: 24px;
+    fill: rgba(0,0,0,0.5);
+    stroke: white;
+    stroke-width: 2;
+    transition: var(--airbnb-transition);
+}
+
+.btn-favorito:hover svg,
+.btn-favorito.active svg {
+    fill: var(--airbnb-primary);
+    stroke: var(--airbnb-primary);
+}
+
+/* Carrusel dentro de card */
+.card-carousel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.card-carousel-inner {
+    display: flex;
+    transition: transform 0.3s ease;
+    height: 100%;
+}
+
+.card-carousel-item {
+    min-width: 100%;
+    height: 100%;
+}
+
+.card-carousel-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--airbnb-white);
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: var(--airbnb-transition);
+    box-shadow: var(--airbnb-shadow-light);
+    z-index: 3;
+}
+
+.propiedad-card:hover .card-carousel-btn {
+    opacity: 1;
+}
+
+.card-carousel-btn:hover {
+    transform: translateY(-50%) scale(1.1);
+}
+
+.card-carousel-btn.prev {
+    left: 8px;
+}
+
+.card-carousel-btn.next {
+    right: 8px;
+}
+
+/* Indicadores del carrusel */
+.card-carousel-indicators {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 4px;
+    z-index: 3;
+}
+
+.card-carousel-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transition: var(--airbnb-transition);
+}
+
+.card-carousel-indicator.active {
+    background: var(--airbnb-white);
+    width: 8px;
+    height: 8px;
+}
+
+/* Info de la card */
+.propiedad-card-info {
+    padding: 12px 0;
+}
+
+.propiedad-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 4px;
+}
+
+.propiedad-card-location {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--airbnb-dark);
+    margin: 0;
+}
+
+.propiedad-card-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+}
+
+.propiedad-card-rating i {
+    color: var(--airbnb-dark);
+}
+
+.propiedad-card-title {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0 0 4px 0;
+    font-weight: 400;
+}
+
+.propiedad-card-details {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0 0 8px 0;
+}
+
+.propiedad-card-price {
+    font-size: 15px;
+    color: var(--airbnb-dark);
+}
+
+.propiedad-card-price strong {
+    font-weight: 600;
+}
+
+.propiedad-card-price span {
+    color: var(--airbnb-gray);
+}
+
+/* ==================== VISTA DETALLE ==================== */
+
+.detalle-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* Header del detalle */
+.detalle-header {
+    margin-bottom: 24px;
+}
+
+.detalle-title {
+    font-size: 26px;
+    font-weight: 600;
+    color: var(--airbnb-dark);
+    margin: 0 0 8px 0;
+}
+
+.detalle-subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.detalle-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+}
+
+.detalle-rating i {
+    color: var(--airbnb-dark);
+}
+
+.detalle-reviews {
+    text-decoration: underline;
+    color: var(--airbnb-dark);
+    cursor: pointer;
+}
+
+.detalle-location {
+    text-decoration: underline;
+    color: var(--airbnb-dark);
+}
+
+.detalle-actions {
+    display: flex;
+    gap: 16px;
+    margin-left: auto;
+}
+
+.detalle-actions button {
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+/* ==================== GALERÍA HERO ==================== */
+
+.galeria-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    border-radius: var(--airbnb-border-radius);
+    overflow: hidden;
+    margin-bottom: 48px;
+    max-height: 450px;
+}
+
+.galeria-hero-main {
+    grid-row: span 2;
+}
+
+.galeria-hero-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: var(--airbnb-transition);
+}
+
+.galeria-hero-main img:hover {
+    filter: brightness(0.9);
+}
+
+.galeria-hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+}
+
+.galeria-hero-grid img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    cursor: pointer;
+    transition: var(--airbnb-transition);
+}
+
+.galeria-hero-grid img:hover {
+    filter: brightness(0.9);
+}
+
+.galeria-hero-item {
+    position: relative;
+}
+
+.btn-mostrar-fotos {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    background: var(--airbnb-white);
+    color: var(--airbnb-dark);
+    border: 1px solid var(--airbnb-dark);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--airbnb-transition);
+}
+
+.btn-mostrar-fotos:hover {
+    background: var(--airbnb-background);
+}
+
+@media (max-width: 768px) {
+    .galeria-hero {
+        grid-template-columns: 1fr;
+        max-height: 300px;
+    }
+    
+    .galeria-hero-grid {
+        display: none;
+    }
+    
+    .galeria-hero-main {
+        grid-row: span 1;
+    }
+}
+
+/* ==================== LAYOUT PRINCIPAL ==================== */
+
+.detalle-content {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 80px;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .detalle-content {
+        grid-template-columns: 1fr;
+        gap: 40px;
+    }
+}
+
+/* Columna Izquierda - Info */
+.detalle-info {
+    border-top: 1px solid var(--airbnb-light-gray);
+    padding-top: 24px;
+}
+
+.info-host {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-host-details h2 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.info-host-details p {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0;
+}
+
+.info-host-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.info-host-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Highlights */
+.info-highlights {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.highlight-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.highlight-item:last-child {
+    margin-bottom: 0;
+}
+
+.highlight-icon {
+    font-size: 24px;
+    color: var(--airbnb-dark);
+    width: 32px;
+    text-align: center;
+}
+
+.highlight-text h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.highlight-text p {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0;
+}
+
+/* Descripción */
+.info-descripcion {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-descripcion p {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--airbnb-dark);
+}
+
+.btn-mostrar-mas {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 16px;
+    color: var(--airbnb-dark);
+}
+
+/* Dónde vas a dormir */
+.info-dormitorio {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-dormitorio h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+}
+
+.dormitorio-card {
+    border: 1px solid var(--airbnb-light-gray);
+    border-radius: var(--airbnb-border-radius);
+    padding: 24px;
+    max-width: 200px;
+}
+
+.dormitorio-card img {
+    width: 100%;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.dormitorio-card h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.dormitorio-card p {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0;
+}
+
+/* Amenidades */
+.info-amenidades {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-amenidades h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+}
+
+.amenidades-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.amenidad-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 16px;
+}
+
+.amenidad-item i {
+    font-size: 24px;
+    width: 24px;
+    text-align: center;
+    color: var(--airbnb-dark);
+}
+
+.btn-mostrar-amenidades {
+    background: var(--airbnb-white);
+    border: 1px solid var(--airbnb-dark);
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: var(--airbnb-transition);
+}
+
+.btn-mostrar-amenidades:hover {
+    background: var(--airbnb-background);
+}
+
+/* Calendario */
+.info-calendario {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-calendario h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.info-calendario p {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0 0 24px 0;
+}
+
+/* ==================== SIDEBAR RESERVA (STICKY) ==================== */
+
+.reserva-widget {
+    position: sticky;
+    top: 80px;
+    border: 1px solid var(--airbnb-light-gray);
+    border-radius: var(--airbnb-border-radius);
+    padding: 24px;
+    box-shadow: var(--airbnb-shadow);
+}
+
+.reserva-precio {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 24px;
+}
+
+.reserva-precio-valor {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.reserva-precio-periodo {
+    font-size: 16px;
+    color: var(--airbnb-gray);
+}
+
+.reserva-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    margin-left: auto;
+}
+
+.reserva-rating i {
+    color: var(--airbnb-dark);
+}
+
+/* Formulario de fechas */
+.reserva-form {
+    border: 1px solid var(--airbnb-light-gray);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.reserva-fechas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.reserva-fecha-input {
+    padding: 12px;
+    border: none;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.reserva-fecha-input:first-child {
+    border-right: 1px solid var(--airbnb-light-gray);
+}
+
+.reserva-fecha-input label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.reserva-fecha-input input {
+    width: 100%;
+    border: none;
+    font-size: 14px;
+    padding: 0;
+    outline: none;
+}
+
+.reserva-huespedes {
+    padding: 12px;
+    cursor: pointer;
+    position: relative;
+}
+
+.reserva-huespedes label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.reserva-huespedes-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+/* Botón Reservar */
+.btn-reservar {
+    width: 100%;
+    background: linear-gradient(to right, #E61E4D, #E31C5F, #D70466);
+    color: white;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--airbnb-transition);
+}
+
+.btn-reservar:hover {
+    background: linear-gradient(to right, #D70466, #E31C5F, #E61E4D);
+    transform: scale(1.02);
+}
+
+.btn-reservar:disabled {
+    background: var(--airbnb-light-gray);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reserva-nota {
+    text-align: center;
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin-top: 16px;
+}
+
+/* Desglose de precios */
+.reserva-desglose {
+    padding-top: 24px;
+    border-top: 1px solid var(--airbnb-light-gray);
+    margin-top: 24px;
+}
+
+.desglose-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.desglose-item span:first-child {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.desglose-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid var(--airbnb-light-gray);
+    margin-top: 16px;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* ==================== EVALUACIONES ==================== */
+
+.info-evaluaciones {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.evaluaciones-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.evaluaciones-score {
+    font-size: 56px;
+    font-weight: 600;
+}
+
+.evaluaciones-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.evaluaciones-subtitle {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+}
+
+/* Barras de calificación */
+.evaluaciones-barras {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+    .evaluaciones-barras {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.barra-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.barra-label {
+    font-size: 12px;
+    min-width: 80px;
+}
+
+.barra-progress {
+    flex: 1;
+    height: 4px;
+    background: var(--airbnb-light-gray);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.barra-fill {
+    height: 100%;
+    background: var(--airbnb-dark);
+    border-radius: 2px;
+}
+
+.barra-value {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 28px;
+    text-align: right;
+}
+
+/* Lista de reseñas */
+.evaluaciones-lista {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .evaluaciones-lista {
+        grid-template-columns: 1fr;
+    }
+}
+
+.evaluacion-item {
+    padding-right: 24px;
+}
+
+.evaluacion-header {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.evaluacion-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.evaluacion-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.evaluacion-info h4 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.evaluacion-info p {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0;
+}
+
+.evaluacion-texto {
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--airbnb-dark);
+}
+
+/* ==================== MAPA ==================== */
+
+.info-mapa {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.info-mapa h3 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+}
+
+.info-mapa .ubicacion-texto {
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin: 0 0 24px 0;
+}
+
+.mapa-container {
+    height: 480px;
+    border-radius: var(--airbnb-border-radius);
+    overflow: hidden;
+    background: var(--airbnb-background);
+}
+
+/* ==================== MODAL GALERÍA ==================== */
+
+.modal-galeria {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--airbnb-white);
+    z-index: 9999;
+    display: none;
+    overflow-y: auto;
+}
+
+.modal-galeria.active {
+    display: block;
+}
+
+.modal-galeria-header {
+    position: sticky;
+    top: 0;
+    background: var(--airbnb-white);
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+    z-index: 10;
+}
+
+.modal-galeria-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.modal-galeria-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+.modal-galeria-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.modal-galeria-grid img {
+    width: 100%;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+    .detalle-container {
+        padding: 16px;
+    }
+    
+    .detalle-title {
+        font-size: 22px;
+    }
+    
+    .reserva-widget {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        border-radius: 0;
+        border: none;
+        border-top: 1px solid var(--airbnb-light-gray);
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--airbnb-white);
+        z-index: 100;
+    }
+    
+    .reserva-widget .reserva-form,
+    .reserva-widget .reserva-desglose,
+    .reserva-widget .reserva-nota {
+        display: none;
+    }
+    
+    .reserva-widget .btn-reservar {
+        width: auto;
+        padding: 14px 32px;
+    }
+    
+    .amenidades-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ==================== UTILIDADES ==================== */
+
+.text-airbnb-primary {
+    color: var(--airbnb-primary);
+}
+
+.bg-airbnb-primary {
+    background-color: var(--airbnb-primary);
+}
+
+.text-airbnb-gray {
+    color: var(--airbnb-gray);
+}
+
+.separator {
+    width: 4px;
+    height: 4px;
+    background: var(--airbnb-gray);
+    border-radius: 50%;
+}
