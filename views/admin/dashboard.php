@@ -84,9 +84,18 @@
                             <i class="fas fa-tachometer-alt me-2"></i>Dashboard
                         </a>
                         <a class="nav-link" href="<?php echo RUTA_ADMIN; ?>reservas">
-                            <i class="fas fa-calendar-alt me-2"></i>Gestión de Reservas
+                            <i class="fas fa-calendar-alt me-2"></i>Calendario de Reservas
+                        </a>
+                        <a class="nav-link" href="<?php echo RUTA_ADMIN; ?>nueva_reservacion">
+                            <i class="fas fa-plus-circle me-2"></i>Nueva Reservación
+                        </a>
+                        <a class="nav-link" href="<?php echo RUTA_ADMIN; ?>casas">
+                            <i class="fas fa-home me-2"></i>Gestión de Casas
                         </a>
                         <hr class="text-white">
+                        <a class="nav-link" href="<?php echo RUTA_PRINCIPAL; ?>" target="_blank">
+                            <i class="fas fa-external-link-alt me-2"></i>Ver Sitio Web
+                        </a>
                         <a class="nav-link" href="<?php echo RUTA_ADMIN; ?>logout">
                             <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
                         </a>
@@ -156,12 +165,17 @@
                             </div>
                             <div class="card-body">
                                 <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <a href="<?php echo RUTA_ADMIN; ?>reservas" class="btn btn-primary btn-lg w-100">
+                                    <div class="col-md-4 mb-3">
+                                        <a href="<?php echo RUTA_ADMIN; ?>nueva_reservacion" class="btn btn-primary btn-lg w-100">
                                             <i class="fas fa-calendar-plus me-2"></i>Gestionar Reservas
                                         </a>
                                     </div>
-                                    <div class="col-md-6 mb-3">
+                                    <div class="col-md-4 mb-3">
+                                        <a href="<?php echo RUTA_ADMIN; ?>casas" class="btn btn-success btn-lg w-100">
+                                            <i class="fas fa-home me-2"></i>Gestionar Casas
+                                        </a>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
                                         <a href="<?php echo RUTA_PRINCIPAL; ?>" class="btn btn-outline-primary btn-lg w-100" target="_blank">
                                             <i class="fas fa-external-link-alt me-2"></i>Ver Sitio Web
                                         </a>

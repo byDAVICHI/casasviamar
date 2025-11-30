@@ -26,9 +26,10 @@ error_reporting(0);
                     <div class="row">
                         <div class="col-md-6">
                             <img
-                                src="<?php echo RUTA_PRINCIPAL . 'assets/img/habitaciones/' . $data['habitacion']['foto']; ?>"
+                                src="<?php echo obtenerRutaImagenCasa($data['habitacion']['foto']); ?>"
                                 class="img-fluid rounded-top"
-                                alt="" />
+                                alt="<?php echo htmlspecialchars($data['habitacion']['estilo']); ?>"
+                                onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'" />
 
                             <div class="list-group">
                                 <a href="#" class="list-group-item list-group-item-action">

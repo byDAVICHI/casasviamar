@@ -357,3 +357,24 @@ function verificar($valor, $datos = [])
     $existe = array_search($valor, $datos, true);
     return is_numeric($existe);
 }
+
+// OBTENER RUTA DE IMAGEN DE HABITACIÓN/CASA VACACIONAL
+function obtenerRutaImagenCasa($fotoNombre)
+{
+    if (empty($fotoNombre)) {
+        return RUTA_PRINCIPAL . 'assets/principal/images/default-casa.jpg';
+    }
+    
+    // Primero buscar en la nueva ubicación (subidas desde admin)
+    $rutaNueva = 'assets/principal/images/' . $fotoNombre;
+    // Luego en la ubicación original
+    $rutaOriginal = 'assets/img/habitaciones/' . $fotoNombre;
+    
+    if (file_exists($rutaNueva)) {
+        return RUTA_PRINCIPAL . $rutaNueva;
+    } elseif (file_exists($rutaOriginal)) {
+        return RUTA_PRINCIPAL . $rutaOriginal;
+    } else {
+        return RUTA_PRINCIPAL . 'assets/principal/images/default-casa.jpg';
+    }
+}

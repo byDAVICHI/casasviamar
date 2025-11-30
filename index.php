@@ -58,8 +58,20 @@ if (file_exists($dirControllers)) {
     if (method_exists($controller, $metodo)) {
         $controller->$metodo($parametro);
     } else {
-        echo 'METODO NO EXISTE';
+        // Verificar si es una petición AJAX para devolver JSON
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            header('Content-Type: application/json');
+            echo json_encode(['tipo' => 'error', 'msg' => 'MÉTODO NO EXISTE: ' . $metodo], JSON_UNESCAPED_UNICODE);
+        } else {
+            echo 'METODO NO EXISTE';
+        }
     }
 } else {
-    echo 'CONTROLADOR NO EXISTE';
+    // Verificar si es una petición AJAX para devolver JSON
+    if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['tipo' => 'error', 'msg' => 'CONTROLADOR NO EXISTE: ' . $controller], JSON_UNESCAPED_UNICODE);
+    } else {
+        echo 'CONTROLADOR NO EXISTE';
+    }
 }

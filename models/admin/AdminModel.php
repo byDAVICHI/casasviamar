@@ -170,4 +170,63 @@ class AdminModel extends Query
         
         return $this->selectAll($sql);
     }
+
+    // ==================== MÉTODOS CRUD PARA CASAS VACACIONALES ====================
+    
+    public function getCasasVacacionales()
+    {
+        $sql = "SELECT id, estilo, numero, capacidad, slug, foto, video, descripcion, precio, estado, fecha 
+                FROM habitaciones 
+                WHERE estado = 1
+                ORDER BY fecha DESC";
+        return $this->selectAll($sql);
+    }
+
+    public function getCasa($id)
+    {
+        $sql = "SELECT * FROM habitaciones WHERE id = $id";
+        return $this->select($sql);
+    }
+
+    public function crearCasa($estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado)
+    {
+        $sql = "INSERT INTO habitaciones (estilo, numero, capacidad, slug, foto, video, descripcion, precio, estado, fecha) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $array = [$estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado];
+        return $this->save($sql, $array);
+    }
+
+    public function editarCasa($id, $estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado)
+    {
+        $sql = "UPDATE habitaciones 
+                SET estilo = ?, numero = ?, capacidad = ?, slug = ?, foto = ?, video = ?, descripcion = ?, precio = ?, estado = ? 
+                WHERE id = ?";
+        $array = [$estilo, $numero, $capacidad, $slug, $foto, $video, $descripcion, $precio, $estado, $id];
+        return $this->save($sql, $array);
+    }
+
+    public function eliminarCasa($id)
+    {
+        // Eliminación lógica (cambiar estado a 0) para mantener integridad referencial
+        $sql = "UPDATE habitaciones SET estado = 0 WHERE id = ?";
+        $array = [$id];
+        return $this->save($sql, $array);
+    }
+
+    public function verificarReservasActivasCasa($id_habitacion)
+    {
+        $sql = "SELECT COUNT(*) as total FROM reservas 
+                WHERE id_habitacion = $id_habitacion 
+                AND estado = 1 
+                AND fecha_salida >= CURDATE()";
+        $result = $this->select($sql);
+        return $result['total'];
+    }
+
+    public function getCasasDisponibles()
+    {
+        $sql = "SELECT COUNT(*) as total FROM habitaciones WHERE estado = 1";
+        $result = $this->select($sql);
+        return $result['total'];
+    }
 }

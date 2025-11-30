@@ -64,7 +64,7 @@ include_once 'views/template/header-principal.php';
                             <br>
                             <a href="#" class="room">
                                 <figure class="img-wrap">
-                                    <img src="<?php echo RUTA_PRINCIPAL . 'assets/img/habitaciones/' . $data['habitacion']['foto']; ?>" alt="Free website template" class="img-fluid mb-3">
+                                    <img src="<?php echo obtenerRutaImagenCasa($data['habitacion']['foto']); ?>" alt="<?php echo htmlspecialchars($data['habitacion']['estilo']); ?>" class="img-fluid mb-3" onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'">
                                     <label class="font-weight-bold text-black"><?php echo $data['habitacion']['estilo']; ?></label>
                                     <label class="price text-black">$ <?php echo $data['habitacion']['precio']; ?> | NOCHE</label>
                                 </figure>
