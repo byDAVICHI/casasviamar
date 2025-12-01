@@ -2,10 +2,10 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-12 col-md-6 text-center mb-4 mb-md-0 text-md-left" data-aos="fade-up">
-                <h2 class="text-white font-weight-bold">EL MEJOR LUGAR PARA QUEDARSE. RESERVA YA!</h2>
+                <h2 class="text-white font-weight-bold"><?php echo __('hero_best_place'); ?>. <?php echo __('hero_book_now'); ?>!</h2>
             </div>
             <div class="col-12 col-md-6 text-center text-md-right" data-aos="fade-up" data-aos-delay="200">
-                <a href="https://wa.me/527661151203" class="btn btn-outline-white-primary py-3 text-white px-5">RESERVAR AHORA</a>
+                <a href="https://wa.me/527661151203" class="btn btn-outline-white-primary py-3 text-white px-5"><?php echo __('hero_book_now'); ?></a>
             </div>
         </div>
     </div>
@@ -87,6 +87,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Bootstrap 5 Bundle (para selector de idiomas) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
     const base_url = '<?php echo RUTA_PRINCIPAL; ?>';
 

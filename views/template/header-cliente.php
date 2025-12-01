@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="<?php echo lang()->getCurrentLanguageInfo()['code']; ?>">
 
 <head>
     <meta charset="utf-8">
@@ -16,6 +16,9 @@
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Flag Icons CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css">
     
     <!-- SweetAlert2 CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
@@ -314,6 +317,22 @@
             font-weight: 500;
         }
         
+        /* Links de navegación */
+        .nav-link-airbnb {
+            color: var(--airbnb-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            padding: 8px 16px;
+            border-radius: 24px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link-airbnb:hover {
+            background: var(--airbnb-bg);
+            color: var(--airbnb-dark);
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .profile-nav {
@@ -328,6 +347,40 @@
                 width: 100%;
                 height: 160px;
             }
+            
+            .navbar-cliente {
+                padding: 10px 0;
+            }
+            
+            .user-menu-btn {
+                padding: 4px 8px 4px 12px;
+            }
+        }
+        
+        /* Tablets */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .main-wrapper {
+                padding: 30px 0;
+            }
+        }
+        
+        /* Pantallas grandes (4K/TV) */
+        @media (min-width: 1920px) {
+            .container-xxl {
+                max-width: 1800px;
+            }
+        }
+        
+        /* Imágenes responsivas */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+        /* Tablas responsivas en móvil */
+        .table-responsive-custom {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
     </style>
     
@@ -367,34 +420,46 @@
     
     <!-- Navbar Superior -->
     <nav class="navbar-cliente">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center">
+        <div class="container-fluid container-xl px-3 px-lg-5">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <!-- Logo -->
                 <a href="<?php echo RUTA_PRINCIPAL; ?>" class="navbar-logo text-decoration-none d-flex align-items-center">
-                    <img src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/logodefinitivo.png" alt="Via-Mar">
-                    <span>Via-Mar</span>
+                    <img src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/logodefinitivo.png" alt="Via-Mar" class="img-fluid" style="max-height: 36px;">
+                    <span class="d-none d-sm-inline">Via-Mar</span>
                 </a>
                 
-                <!-- Menu Usuario -->
-                <div class="dropdown">
-                    <button class="user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-bars"></i>
-                        <?php if ($fotoUsuario && file_exists('assets/img/usuarios/' . $fotoUsuario)): ?>
-                            <img src="<?php echo RUTA_PRINCIPAL . 'assets/img/usuarios/' . $fotoUsuario; ?>" alt="<?php echo $nombreUsuario; ?>" class="user-avatar">
-                        <?php else: ?>
-                            <div class="user-avatar-placeholder"><?php echo $inicialUsuario; ?></div>
-                        <?php endif; ?>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>perfil"><i class="fas fa-user"></i> Mi Perfil</a></li>
-                        <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>perfil/reservas"><i class="fas fa-suitcase"></i> Mis Viajes</a></li>
-                        <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>reserva/pendiente"><i class="fas fa-clock"></i> Reservas Pendientes</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>catalogo"><i class="fas fa-home"></i> Explorar Casas</a></li>
-                        <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>"><i class="fas fa-globe"></i> Ir al Inicio</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt text-danger"></i> Cerrar Sesión</a></li>
-                    </ul>
+                <!-- Navegación Central (Desktop) -->
+                <div class="d-none d-lg-flex align-items-center gap-4">
+                    <a href="<?php echo RUTA_PRINCIPAL; ?>catalogo" class="nav-link-airbnb"><?php echo __('nav_catalog'); ?></a>
+                    <a href="<?php echo RUTA_PRINCIPAL; ?>reserva/pendiente" class="nav-link-airbnb"><?php echo __('nav_reservations'); ?></a>
+                </div>
+                
+                <!-- Acciones (Selector Idioma + Menu Usuario) -->
+                <div class="d-flex align-items-center gap-2 gap-md-3">
+                    <!-- Selector de Idioma -->
+                    <?php include __DIR__ . '/language-selector.php'; ?>
+                    
+                    <!-- Menu Usuario -->
+                    <div class="dropdown">
+                        <button class="user-menu-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bars d-none d-sm-inline"></i>
+                            <?php if ($fotoUsuario && file_exists('assets/img/usuarios/' . $fotoUsuario)): ?>
+                                <img src="<?php echo RUTA_PRINCIPAL . 'assets/img/usuarios/' . $fotoUsuario; ?>" alt="<?php echo $nombreUsuario; ?>" class="user-avatar">
+                            <?php else: ?>
+                                <div class="user-avatar-placeholder"><?php echo $inicialUsuario; ?></div>
+                            <?php endif; ?>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>perfil"><i class="fas fa-user"></i> <?php echo __('nav_profile'); ?></a></li>
+                            <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>perfil/reservas"><i class="fas fa-suitcase"></i> <?php echo __('nav_reservations'); ?></a></li>
+                            <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>reserva/pendiente"><i class="fas fa-clock"></i> <?php echo __('booking_pending'); ?></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item d-lg-none" href="<?php echo RUTA_PRINCIPAL; ?>catalogo"><i class="fas fa-home"></i> <?php echo __('nav_catalog'); ?></a></li>
+                            <li><a class="dropdown-item" href="<?php echo RUTA_PRINCIPAL; ?>"><i class="fas fa-globe"></i> <?php echo __('nav_home'); ?></a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="cerrarSesion()"><i class="fas fa-sign-out-alt text-danger"></i> <?php echo __('nav_logout'); ?></a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>

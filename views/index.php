@@ -13,14 +13,14 @@ include_once 'views/template/header-principal.php';
                 <form id="formulario" class="check-form" action="<?php echo RUTA_PRINCIPAL . 'reserva/verify'; ?>">
                     <div class="row">
                         <div class="col-md-6 mb-3 mb-lg-0 col-lg-3">
-                            <label class="font-weight-bold text-black">Fecha Llegada</label>
+                            <label class="font-weight-bold text-black"><?php echo __('form_check_in'); ?></label>
                             <div class="field-icon-wrap">
                                 <div class="icon"><span class="icon-calendar"></span></div>
                                 <input id="f_llegada" name="f_llegada" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
                             </div>
                         </div>
                         <div class="col-md-6 mb-3 mb-lg-0 col-lg-3">
-                            <label class="font-weight-bold text-black">Fecha Salida</label>
+                            <label class="font-weight-bold text-black"><?php echo __('form_check_out'); ?></label>
                             <div class="field-icon-wrap">
                                 <div class="icon"><span class="icon-calendar"></span></div>
                                 <input id="f_salida" name="f_salida" type="date" class="form-control" value="<?php echo date('Y-m-d'); ?>">
@@ -29,11 +29,11 @@ include_once 'views/template/header-principal.php';
                         <div class="col-md-6 mb-3 mb-md-0 col-lg-3">
                             <div class="row">
                                 <div class="col-md-6 mb-3 mb-md-0">
-                                    <label for="habitacion" class="font-weight-bold text-black">Casa</label>
+                                    <label for="habitacion" class="font-weight-bold text-black"><?php echo __('form_house'); ?></label>
                                     <div class="field-icon-wrap">
 
                                         <select id="habitacion" name="habitacion" class="form-control" style="width: 250px;">
-                                            <option value="">Seleccionar</option>
+                                            <option value=""><?php echo __('form_select'); ?></option>
                                             <?php foreach ($data['habitaciones'] as $habitacion) { ?>
                                                 <option value="<?php echo $habitacion['id']; ?>"><?php echo $habitacion['estilo']; ?></option>
                                             <?php } ?>
@@ -44,7 +44,7 @@ include_once 'views/template/header-principal.php';
                             </div>
                         </div>
                         <div class="col-md-6 col-lg-3 align-self-end">
-                            <button class="btn btn-primary btn-block text-white" type="submit">Comprobar Disponibilidad</button>
+                            <button class="btn btn-primary btn-block text-white" type="submit"><?php echo __('form_check_availability'); ?></button>
                         </div>
                     </div>
                 </form>

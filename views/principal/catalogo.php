@@ -13,19 +13,19 @@ include_once 'views/template/header-principal.php';
     <div class="container">
         <!-- Header del catálogo -->
         <div class="catalogo-header">
-            <h1 class="catalogo-title">Casas Vacacionales en Tecolutla</h1>
-            <p class="catalogo-subtitle">Más de <?php echo count($data['propiedades']); ?> alojamientos disponibles</p>
+            <h1 class="catalogo-title"><?php echo __('catalog_title'); ?></h1>
+            <p class="catalogo-subtitle"><?php echo count($data['propiedades']); ?> <?php echo __('catalog_results'); ?></p>
         </div>
 
         <!-- Filtros (opcional) -->
         <div class="filtros-container mb-4">
             <div class="d-flex gap-2 flex-wrap">
                 <button class="btn btn-outline-dark rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalFiltros">
-                    <i class="fas fa-sliders-h me-2"></i>Filtros
+                    <i class="fas fa-sliders-h me-2"></i><?php echo __('catalog_filters'); ?>
                 </button>
-                <button class="btn btn-outline-dark rounded-pill px-3">Precio</button>
-                <button class="btn btn-outline-dark rounded-pill px-3">Habitaciones</button>
-                <button class="btn btn-outline-dark rounded-pill px-3">Tipo de lugar</button>
+                <button class="btn btn-outline-dark rounded-pill px-3"><?php echo __('catalog_price_range'); ?></button>
+                <button class="btn btn-outline-dark rounded-pill px-3 d-none d-md-inline-block"><?php echo __('catalog_bedrooms'); ?></button>
+                <button class="btn btn-outline-dark rounded-pill px-3 d-none d-lg-inline-block"><?php echo __('catalog_amenities'); ?></button>
             </div>
         </div>
 
@@ -80,15 +80,15 @@ include_once 'views/template/header-principal.php';
                             <p class="propiedad-card-title">Casa vacacional en Tecolutla</p>
                             
                             <p class="propiedad-card-details">
-                                <?php echo $propiedad['capacidad']; ?> huéspedes · 
-                                <?php echo $propiedad['habitaciones_num'] ?? 1; ?> habitación · 
-                                <?php echo $propiedad['camas'] ?? 1; ?> cama · 
-                                <?php echo $propiedad['banos'] ?? 1; ?> baño
+                                <?php echo $propiedad['capacidad']; ?> <?php echo __('property_guests'); ?> · 
+                                <?php echo $propiedad['habitaciones_num'] ?? 1; ?> <?php echo __('property_bedrooms'); ?> · 
+                                <?php echo $propiedad['camas'] ?? 1; ?> <?php echo __('property_beds'); ?> · 
+                                <?php echo $propiedad['banos'] ?? 1; ?> <?php echo __('property_bathrooms'); ?>
                             </p>
                             
                             <p class="propiedad-card-price">
                                 <strong>$<?php echo number_format($propiedad['precio'], 2); ?> MXN</strong>
-                                <span>por noche</span>
+                                <span><?php echo __('property_per_night'); ?></span>
                             </p>
                         </div>
                     </a>
@@ -96,8 +96,8 @@ include_once 'views/template/header-principal.php';
             <?php else: ?>
                 <div class="col-12 text-center py-5">
                     <i class="fas fa-home fa-4x text-muted mb-3"></i>
-                    <h3>No hay propiedades disponibles</h3>
-                    <p class="text-muted">Pronto agregaremos más casas vacacionales.</p>
+                    <h3><?php echo __('catalog_no_results'); ?></h3>
+                    <p class="text-muted"><?php echo __('msg_no_results'); ?></p>
                 </div>
             <?php endif; ?>
         </div>
@@ -110,13 +110,13 @@ include_once 'views/template/header-principal.php';
         <div class="modal-content">
             <div class="modal-header border-0">
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                <h5 class="modal-title w-100 text-center fw-bold">Filtros</h5>
+                <h5 class="modal-title w-100 text-center fw-bold"><?php echo __('catalog_filters'); ?></h5>
                 <div style="width: 32px;"></div>
             </div>
             <div class="modal-body">
                 <!-- Rango de precio -->
                 <div class="mb-4">
-                    <h6 class="fw-bold mb-3">Rango de precios</h6>
+                    <h6 class="fw-bold mb-3"><?php echo __('catalog_price_range'); ?></h6>
                     <div class="row">
                         <div class="col-6">
                             <label class="form-label small">Precio mínimo</label>
@@ -131,7 +131,7 @@ include_once 'views/template/header-principal.php';
                 
                 <!-- Habitaciones -->
                 <div class="mb-4">
-                    <h6 class="fw-bold mb-3">Habitaciones y camas</h6>
+                    <h6 class="fw-bold mb-3"><?php echo __('catalog_bedrooms'); ?></h6>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label small">Habitaciones</label>
@@ -157,8 +157,8 @@ include_once 'views/template/header-principal.php';
                 </div>
             </div>
             <div class="modal-footer border-0 justify-content-between">
-                <button type="button" class="btn btn-link text-dark fw-bold" onclick="limpiarFiltros()">Borrar todo</button>
-                <button type="button" class="btn btn-dark px-4 rounded-pill" onclick="aplicarFiltros()">Mostrar resultados</button>
+                <button type="button" class="btn btn-link text-dark fw-bold" onclick="limpiarFiltros()"><?php echo __('btn_clear'); ?></button>
+                <button type="button" class="btn btn-dark px-4 rounded-pill" onclick="aplicarFiltros()"><?php echo __('btn_filter'); ?></button>
             </div>
         </div>
     </div>

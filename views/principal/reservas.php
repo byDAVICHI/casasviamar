@@ -35,21 +35,21 @@ include_once 'views/template/header-principal.php';
                 <div class="card">
                     <div class="card-body">
                         <form method="get" id="formulario" class="check-form" action="<?php echo RUTA_PRINCIPAL . 'reserva/verify'; ?>">
-                            <label class="font-weight-bold text-black">Fecha Llegada</label>
+                            <label class="font-weight-bold text-black"><?php echo __('form_check_in'); ?></label>
                             <div class="field-icon-wrap">
                                 <div class="icon"><span class="icon-calendar"></span></div>
                                 <input id="f_llegada" name="f_llegada" type="date" class="form-control" value="<?php echo $data['disponible']['f_llegada'] ?>">
                             </div>
-                            <label class="font-weight-bold text-black">Fecha Salida</label>
+                            <label class="font-weight-bold text-black"><?php echo __('form_check_out'); ?></label>
                             <div class="field-icon-wrap">
                                 <div class="icon"><span class="icon-calendar"></span></div>
                                 <input id="f_salida" name="f_salida" type="date" class="form-control" value="<?php echo $data['disponible']['f_salida'] ?>">
                             </div>
-                            <label for="habitacion" class="font-weight-bold text-black">Casa</label>
+                            <label for="habitacion" class="font-weight-bold text-black"><?php echo __('form_house'); ?></label>
                             <div class="field-icon-wrap">
 
                                 <select id="habitacion" name="habitacion" class="form-control" style="width: 215px;">
-                                    <option value="">Seleccionar</option>
+                                    <option value=""><?php echo __('form_select'); ?></option>
                                     <?php foreach ($data['habitaciones'] as $habitacion) { ?>
                                         <option value="<?php echo $habitacion['id']; ?>" <?php echo ($habitacion['id'] == $data['disponible']['habitacion']) ? 'selected' : ''; ?>>
                                             <?php echo $habitacion['estilo']; ?>
@@ -59,7 +59,7 @@ include_once 'views/template/header-principal.php';
                             </div>
                             <br>
                             <div class="field-icon-wrap">
-                                <button class="btn btn-primary btn-block text-white" type="submit">Comprobar </button>
+                                <button class="btn btn-primary btn-block text-white" type="submit"><?php echo __('form_check_availability'); ?></button>
                             </div>
                             <br>
                             <a href="#" class="room">
@@ -72,7 +72,7 @@ include_once 'views/template/header-principal.php';
                             <br>
                             <div class="field-icon-wrap">
                                 <?php if (!empty($_SESSION['id_usuario'])) { ?>
-                                    <a href="<?php echo RUTA_PRINCIPAL . 'reserva/pendiente'; ?>" class="btn btn-primary btn-block text-white">Reservar</a>
+                                    <a href="<?php echo RUTA_PRINCIPAL . 'reserva/pendiente'; ?>" class="btn btn-primary btn-block text-white"><?php echo __('btn_reserve'); ?></a>
                                 <?php } else { ?>
                                     <a href="<?php echo RUTA_PRINCIPAL . 'login'; ?>" class="btn btn-primary btn-block text-white">Login</a>
                                 <?php } ?>

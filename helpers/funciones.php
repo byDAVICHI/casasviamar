@@ -1,4 +1,13 @@
 <?php
+// Incluir sistema de idiomas (i18n)
+require_once __DIR__ . '/Language.php';
+
+// Inicializar sistema de idiomas
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$lang = Language::getInstance();
+
 // LIMPIAR CARACTERES ESPECIALES PARA PREVENIR INYECCION SQL
 function strClean($cadena)
 {
