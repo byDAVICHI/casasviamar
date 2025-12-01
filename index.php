@@ -1,4 +1,10 @@
 <?php
+// Forzar redirección a www en producción para evitar CORS
+if (isset($_SERVER['HTTP_HOST']) && $_SERVER['HTTP_HOST'] === 'casasviamar.com') {
+    header('Location: https://www.casasviamar.com' . $_SERVER['REQUEST_URI'], true, 301);
+    exit;
+}
+
 require_once 'config/config.php';
 require_once 'helpers/funciones.php';
 // CAPTURAR LA URL ACTUAL
