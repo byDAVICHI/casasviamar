@@ -153,4 +153,27 @@ class PropiedadModel extends Query
         $result = $this->selectAll($sql, [$id_usuario]);
         return $result ? $result : [];
     }
+
+    // Obtener reservas en conflicto con las fechas dadas
+    public function getReservasConflicto($id_habitacion, $fecha_inicio, $fecha_fin)
+    {
+        $sql = "SELECT * FROM reservas 
+                WHERE id_habitacion = ? 
+                AND estado = 1
+                AND fecha_ingreso < ? 
+                AND fecha_salida > ?
+                ORDER BY fecha_ingreso";
+        $result = $this->selectAll($sql, [$id_habitacion, $fecha_fin, $fecha_inicio]);
+        return $result ? $result : [];
+    }
+
+    // Obtener todas las reservas de una habitación
+    public function getReservasHabitacion($id_habitacion)
+    {
+        $sql = "SELECT * FROM reservas 
+                WHERE id_habitacion = ? AND estado = 1
+                ORDER BY fecha_ingreso";
+        $result = $this->selectAll($sql, [$id_habitacion]);
+        return $result ? $result : [];
+    }
 }

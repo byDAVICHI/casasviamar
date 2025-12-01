@@ -37,8 +37,26 @@ class Login extends Controller
                             'nombre' => $verificar['nombre'] . ' ' . $verificar['apellido'],
                             'rol' => $verificar['rol']
                         ]);
-                        $res = ['tipo' => 'success', 'msg' => 'BIENVENIDO'];
+                        // Agregar foto y nombre a la sesión
+                        $_SESSION['foto_usuario'] = $verificar['foto'] ?? null;
+                        $_SESSION['nombre_usuario'] = $verificar['nombre'];
                         $_SESSION['usuario'] = $verificar['id'];
+                        
+                        // Determinar URL de redirección según el rol
+                        $rol = strtolower($verificar['rol']);
+                        if ($rol === 'admin') {
+                            $redirect = 'admin/dashboard';
+                        } else {
+                            // Usuario/Huésped → directo a reserva pendiente
+                            $redirect = 'reserva/pendiente';
+                        }
+                        
+                        $res = [
+                            'tipo' => 'success', 
+                            'msg' => 'BIENVENIDO',
+                            'redirect' => $redirect,
+                            'rol' => $rol
+                        ];
                     } else {
                         $res = ['tipo' => 'warning', 'msg' => 'CONTRASEÑA INCORRECTA'];
                     }
@@ -49,5 +67,13 @@ class Login extends Controller
             echo json_encode($res, JSON_UNESCAPED_UNICODE);
             die();
         }
+    }
+    
+    // Cerrar sesión
+    public function logout()
+    {
+        session_destroy();
+        header('Location: ' . RUTA_PRINCIPAL);
+        exit;
     }
 }

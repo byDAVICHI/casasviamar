@@ -40,7 +40,7 @@ include_once 'views/template/header-principal.php';
 include_once 'views/template/footer-principal.php';
 ?>
 
-<script src=" <?php echo RUTA_PRINCIPAL . 'assets/principal/js/pages/login.js'  ?>"></script>
+<script src="<?php echo RUTA_PRINCIPAL . 'assets/principal/js/pages/login.js?v=' . time(); ?>"></script>
 
 </body>
 

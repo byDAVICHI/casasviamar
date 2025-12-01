@@ -10,9 +10,20 @@ class Reserva extends Controller
     public function __construct()
     {
         parent::__construct();
-        if (!isset($_SESSION['total'])) {
+        // Iniciar sesión si no está iniciada
+        if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
+    }
+    
+    /**
+     * Método index - Redirige a pendiente por defecto
+     */
+    public function index()
+    {
+        // Redirigir a reserva/pendiente
+        header('Location: ' . RUTA_PRINCIPAL . 'reserva/pendiente');
+        exit;
     }
 
     public function verify()
@@ -22,29 +33,35 @@ class Reserva extends Controller
             $f_salida = strClean($_GET['f_salida']);
             $habitacion = strClean($_GET['habitacion']);
             $_SESSION['habitacionR'] = $habitacion;
+            
             if (empty($f_llegada) || empty($f_salida) || empty($habitacion)) {
                 header('Location: ' . RUTA_PRINCIPAL . '?respuesta=warning');
-            } else {
-                $reserva = $this->model->getDisponible($f_llegada, $f_salida, $habitacion);
-                $data['title'] = 'Reservas | Verificar Disponibilidad';
-                $data['disponible'] = [
+                exit;
+            }
+            
+            // Verificar disponibilidad
+            $reserva = $this->model->getDisponible($f_llegada, $f_salida, $habitacion);
+            
+            if (empty($reserva)) {
+                // DISPONIBLE - Guardar en sesión y redirigir a pendiente
+                $_SESSION['reserva'] = [
                     'f_llegada' => $f_llegada,
                     'f_salida' => $f_salida,
                     'habitacion' => $habitacion
                 ];
-                if (empty($reserva)) {
-                    // CREAR SESION DE LA HABITACION
-                    $_SESSION['reserva'] = $data['disponible'];
-                    $data['mensaje'] = 'DISPONIBLE';
-                    $data['tipo'] = 'success';
-                } else {
-                    $data['mensaje'] = 'NO DISPONIBLE';
-                    $data['tipo'] = 'danger';
-                }
-                $data['habitaciones'] = $this->model->getHabitaciones();
-                $data['habitacion'] = $this->model->getHabitacion($habitacion);
-                $this->views->getView('principal/reservas', $data);
+                
+                // Redirigir directamente a la página de pago
+                header('Location: ' . RUTA_PRINCIPAL . 'reserva/pendiente');
+                exit;
+            } else {
+                // NO DISPONIBLE - Redirigir de vuelta a la propiedad con mensaje
+                header('Location: ' . RUTA_PRINCIPAL . 'propiedad/detalle/' . $habitacion . '?error=nodisponible');
+                exit;
             }
+        } else {
+            // Sin parámetros - redirigir al catálogo
+            header('Location: ' . RUTA_PRINCIPAL . 'catalogo');
+            exit;
         }
     }
 
@@ -81,27 +98,38 @@ class Reserva extends Controller
     {
         $data['title'] = 'Reserva Pendiente';
         $data['habitacion'] = [];
+        $data['total'] = 0;
+        $data['noches'] = 0;
+        $data['tarifa_servicio'] = 0;
+        
         if (!empty($_SESSION['reserva'])) {
             $data['habitacion'] = $this->model->getHabitacion($_SESSION['reserva']['habitacion']);
-        } else {
-            # code...
+            
+            // CALCULAR PRECIO ANTES de renderizar la vista
+            $fecha1 = new DateTime($_SESSION['reserva']['f_llegada']);
+            $fecha2 = new DateTime($_SESSION['reserva']['f_salida']);
+            $diferencia = $fecha2->diff($fecha1);
+            $noches = $diferencia->days;
+            
+            $precioNoche = floatval($data['habitacion']['precio'] ?? 0);
+            $tarifaLimpieza = floatval($data['habitacion']['tarifa_limpieza'] ?? 0);
+            
+            // Cálculos
+            $subtotal = $precioNoche * $noches;
+            $tarifaServicio = $subtotal * 0.12; // 12% tarifa de servicio
+            $total = $subtotal + $tarifaLimpieza + $tarifaServicio;
+            
+            // Asignar a data y sesión
+            $data['noches'] = $noches;
+            $data['subtotal'] = $subtotal;
+            $data['tarifa_limpieza'] = $tarifaLimpieza;
+            $data['tarifa_servicio'] = $tarifaServicio;
+            $data['total'] = $total;
+            $_SESSION['total'] = $total;
         }
-        // MERCADO PAGO
-        // Agrega credenciales
-
+        
+        // Renderizar vista DESPUÉS de calcular el precio
         $this->views->getView('principal/clientes/reservas/pendiente', $data);
-
-        // CAPTURAR LA CANTIDAD
-
-        $fecha1 = new DateTime($_SESSION['reserva']['f_llegada']);
-        $fecha2 = new DateTime($_SESSION['reserva']['f_salida']);
-
-
-        $cantidad = $fecha2->diff($fecha1);
-        $precio = floatval($data['habitacion']['precio']);
-
-        $data['total'] = $cantidad->d * $precio;
-        $_SESSION['total'] = $cantidad->d * $precio;
     }
 
     public function registrarReserva()

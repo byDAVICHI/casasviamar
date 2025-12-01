@@ -234,6 +234,22 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
                                value="<?php echo $data['fecha_salida'] ?? ''; ?>">
                     </div>
                 </div>
+                
+                <!-- Feedback de disponibilidad -->
+                <div id="disponibilidad-feedback" class="disponibilidad-feedback" style="display: none;">
+                    <div class="feedback-content">
+                        <i class="fas fa-spinner fa-spin" id="feedback-loading"></i>
+                        <span id="feedback-mensaje"></span>
+                    </div>
+                </div>
+                
+                <!-- Enlace al calendario -->
+                <div class="ver-calendario" style="text-align: center; margin: 10px 0;">
+                    <a href="#" onclick="abrirCalendarioModal(); return false;" style="color: #222; text-decoration: underline; font-size: 14px;">
+                        <i class="fas fa-calendar-alt"></i> Ver calendario de disponibilidad
+                    </a>
+                </div>
+                
                 <div class="reserva-huespedes" onclick="toggleHuespedes()">
                     <label>HUÉSPEDES</label>
                     <div class="reserva-huespedes-selector">
@@ -244,7 +260,7 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
                 </div>
             </div>
 
-            <button class="btn-reservar" id="btnReservar" onclick="iniciarReserva()">
+            <button class="btn-reservar" id="btnReservar" onclick="iniciarReserva()" disabled>
                 Reservar
             </button>
 
@@ -378,7 +394,76 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
     </div>
 </div>
 
+<!-- Modal Calendario de Disponibilidad -->
+<div class="modal fade" id="modalCalendario" tabindex="-1" aria-labelledby="modalCalendarioLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #FF385C 0%, #E31C5F 100%); color: white;">
+                <h5 class="modal-title" id="modalCalendarioLabel">
+                    <i class="fas fa-calendar-alt me-2"></i> Calendario de Disponibilidad
+                </h5>
+                <button type="button" class="btn-close btn-close-white" onclick="cerrarCalendarioModal()" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <div class="d-flex gap-3 justify-content-center">
+                        <span><span style="display:inline-block;width:20px;height:20px;background:#dc3545;border-radius:4px;"></span> Ocupado</span>
+                        <span><span style="display:inline-block;width:20px;height:20px;background:#28a745;border-radius:4px;"></span> Disponible</span>
+                        <span><span style="display:inline-block;width:20px;height:20px;background:#ffc107;border-radius:4px;"></span> Tu selección</span>
+                    </div>
+                </div>
+                <div id="calendarioDisponibilidad" style="min-height: 400px;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="cerrarCalendarioModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos para feedback de disponibilidad -->
+<style>
+.disponibilidad-feedback {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+}
+.disponibilidad-feedback.disponible {
+    background-color: #d4edda;
+    border: 1px solid #28a745;
+    color: #155724;
+}
+.disponibilidad-feedback.no-disponible {
+    background-color: #f8d7da;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+.disponibilidad-feedback.cargando {
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+.feedback-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.btn-reservar:disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+}
+#calendarioDisponibilidad .fc-day-today {
+    background-color: rgba(255, 56, 92, 0.1) !important;
+}
+</style>
+
 <?php include_once 'views/template/footer-principal.php'; ?>
+
+<!-- FullCalendar -->
+<script src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/fullcalendar/index.global.min.js"></script>
+<script src="<?php echo RUTA_PRINCIPAL; ?>assets/principal/fullcalendar/es.global.min.js"></script>
 
 <!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -468,45 +553,230 @@ function initMapa() {
     }
 }
 
-// Calculador de precios
+// Variable para el calendario
+let calendarioModal = null;
+
+// Calculador de precios con verificación de disponibilidad
 function initCalculadorPrecios() {
     const fechaLlegada = document.getElementById('fecha_llegada');
     const fechaSalida = document.getElementById('fecha_salida');
     
-    fechaLlegada.addEventListener('change', calcularPrecio);
-    fechaSalida.addEventListener('change', calcularPrecio);
+    fechaLlegada.addEventListener('change', function() {
+        // Ajustar fecha mínima de salida
+        if (this.value) {
+            const minSalida = new Date(this.value);
+            minSalida.setDate(minSalida.getDate() + 1);
+            fechaSalida.min = minSalida.toISOString().split('T')[0];
+            
+            // Si la fecha de salida es menor, limpiarla
+            if (fechaSalida.value && fechaSalida.value <= this.value) {
+                fechaSalida.value = '';
+            }
+        }
+        verificarYCalcular();
+    });
     
-    // Si hay fechas precargadas, calcular
+    fechaSalida.addEventListener('change', verificarYCalcular);
+    
+    // Si hay fechas precargadas, verificar
     if (fechaLlegada.value && fechaSalida.value) {
-        calcularPrecio();
+        verificarYCalcular();
     }
 }
 
-function calcularPrecio() {
-    const fechaLlegada = new Date(document.getElementById('fecha_llegada').value);
-    const fechaSalida = new Date(document.getElementById('fecha_salida').value);
+// Verificar disponibilidad y calcular precio
+function verificarYCalcular() {
+    const fechaLlegadaInput = document.getElementById('fecha_llegada');
+    const fechaSalidaInput = document.getElementById('fecha_salida');
+    const fechaLlegada = fechaLlegadaInput.value;
+    const fechaSalida = fechaSalidaInput.value;
     
-    if (isNaN(fechaLlegada) || isNaN(fechaSalida) || fechaSalida <= fechaLlegada) {
+    if (!fechaLlegada || !fechaSalida) {
+        ocultarFeedback();
         document.getElementById('desglose').style.display = 'none';
+        document.getElementById('btnReservar').disabled = true;
         return;
     }
     
-    // Calcular noches
-    const diffTime = Math.abs(fechaSalida - fechaLlegada);
-    const noches = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (new Date(fechaSalida) <= new Date(fechaLlegada)) {
+        mostrarFeedback('La fecha de salida debe ser posterior a la de llegada', 'no-disponible');
+        document.getElementById('desglose').style.display = 'none';
+        document.getElementById('btnReservar').disabled = true;
+        return;
+    }
     
-    // Calcular precios
-    const subtotalNoches = precioNoche * noches;
-    const tarifaServicio = subtotalNoches * 0.12; // 12% tarifa de servicio
-    const total = subtotalNoches + tarifaLimpieza + tarifaServicio;
+    // Mostrar loading
+    mostrarFeedback('<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...', 'cargando');
     
-    // Actualizar UI
-    document.getElementById('num_noches').textContent = noches;
-    document.getElementById('subtotal_noches').textContent = '$' + subtotalNoches.toLocaleString('es-MX', {minimumFractionDigits: 2});
-    document.getElementById('tarifa_servicio').textContent = '$' + tarifaServicio.toLocaleString('es-MX', {minimumFractionDigits: 2});
-    document.getElementById('total_reserva').textContent = '$' + total.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    // Llamar al API
+    fetch(base_url + 'propiedad/verificarDisponibilidad', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `id_habitacion=${propiedadId}&fecha_inicio=${fechaLlegada}&fecha_fin=${fechaSalida}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.disponible) {
+            // Disponible - mostrar feedback verde y habilitar botón
+            mostrarFeedback('<i class="fas fa-check-circle"></i> ' + data.mensaje, 'disponible');
+            document.getElementById('btnReservar').disabled = false;
+            
+            // Actualizar desglose de precios
+            actualizarDesglose(data);
+        } else {
+            // No disponible - mostrar feedback rojo y deshabilitar botón
+            mostrarFeedback('<i class="fas fa-times-circle"></i> ' + data.mensaje, 'no-disponible');
+            document.getElementById('btnReservar').disabled = true;
+            document.getElementById('desglose').style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarFeedback('<i class="fas fa-exclamation-triangle"></i> Error al verificar disponibilidad', 'no-disponible');
+        document.getElementById('btnReservar').disabled = true;
+    });
+}
+
+// Mostrar feedback de disponibilidad
+function mostrarFeedback(mensaje, tipo) {
+    const feedback = document.getElementById('disponibilidad-feedback');
+    const contenido = document.getElementById('feedback-mensaje');
+    
+    feedback.className = 'disponibilidad-feedback ' + tipo;
+    contenido.innerHTML = mensaje;
+    feedback.style.display = 'block';
+}
+
+// Ocultar feedback
+function ocultarFeedback() {
+    document.getElementById('disponibilidad-feedback').style.display = 'none';
+}
+
+// Actualizar desglose de precios con datos del servidor
+function actualizarDesglose(data) {
+    document.getElementById('num_noches').textContent = data.noches;
+    document.getElementById('subtotal_noches').textContent = '$' + data.subtotal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('tarifa_servicio').textContent = '$' + data.tarifa_servicio.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('total_reserva').textContent = '$' + data.precio_total.toLocaleString('es-MX', {minimumFractionDigits: 2});
     
     document.getElementById('desglose').style.display = 'block';
+}
+
+// Variable para instancia del modal
+let modalCalendarioInstance = null;
+
+// Abrir modal del calendario
+function abrirCalendarioModal() {
+    const modalElement = document.getElementById('modalCalendario');
+    modalCalendarioInstance = new bootstrap.Modal(modalElement);
+    modalCalendarioInstance.show();
+    
+    // Inicializar calendario si no existe
+    setTimeout(() => {
+        initCalendarioDisponibilidad();
+    }, 300);
+}
+
+// Cerrar modal del calendario
+function cerrarCalendarioModal() {
+    if (modalCalendarioInstance) {
+        modalCalendarioInstance.hide();
+    } else {
+        // Fallback: cerrar directamente
+        const modalElement = document.getElementById('modalCalendario');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        } else {
+            // Fallback manual
+            modalElement.classList.remove('show');
+            modalElement.style.display = 'none';
+            document.body.classList.remove('modal-open');
+            const backdrop = document.querySelector('.modal-backdrop');
+            if (backdrop) backdrop.remove();
+        }
+    }
+}
+
+// Inicializar FullCalendar en el modal
+function initCalendarioDisponibilidad() {
+    const calendarEl = document.getElementById('calendarioDisponibilidad');
+    
+    // Si ya existe, destruir y recrear
+    if (calendarioModal) {
+        calendarioModal.destroy();
+    }
+    
+    const fechaLlegada = document.getElementById('fecha_llegada').value;
+    const fechaSalida = document.getElementById('fecha_salida').value;
+    
+    // Construir URL con fechas seleccionadas
+    let eventosUrl = base_url + 'propiedad/getReservasCalendario?id=' + propiedadId;
+    if (fechaLlegada && fechaSalida) {
+        eventosUrl += '&f_llegada=' + fechaLlegada + '&f_salida=' + fechaSalida;
+    }
+    
+    calendarioModal = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth'
+        },
+        height: 'auto',
+        events: eventosUrl,
+        eventClick: function(info) {
+            if (info.event.id !== 'consulta') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Fecha Ocupada',
+                    text: `Del ${info.event.startStr} al ${info.event.endStr}`,
+                    confirmButtonColor: '#FF385C'
+                });
+            }
+        },
+        dateClick: function(info) {
+            // Al hacer clic en una fecha, seleccionarla
+            const fechaLlegadaInput = document.getElementById('fecha_llegada');
+            const fechaSalidaInput = document.getElementById('fecha_salida');
+            
+            if (!fechaLlegadaInput.value || (fechaLlegadaInput.value && fechaSalidaInput.value)) {
+                // Si no hay fecha de llegada o ambas están llenas, setear llegada
+                fechaLlegadaInput.value = info.dateStr;
+                fechaSalidaInput.value = '';
+                Swal.fire({
+                    toast: true,
+                    position: 'top',
+                    icon: 'info',
+                    title: 'Fecha de llegada: ' + info.dateStr,
+                    text: 'Ahora selecciona la fecha de salida',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
+            } else {
+                // Setear fecha de salida
+                if (info.dateStr > fechaLlegadaInput.value) {
+                    fechaSalidaInput.value = info.dateStr;
+                    // Cerrar modal y verificar
+                    cerrarCalendarioModal();
+                    verificarYCalcular();
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Fecha inválida',
+                        text: 'La fecha de salida debe ser posterior a la de llegada',
+                        confirmButtonColor: '#FF385C'
+                    });
+                }
+            }
+        }
+    });
+    
+    calendarioModal.render();
 }
 
 // Iniciar reserva
@@ -520,20 +790,23 @@ function iniciarReserva() {
         return;
     }
     
-    <?php if (!isset($_SESSION['id_usuario'])): ?>
-        window.location.href = base_url + 'login?redirect=' + encodeURIComponent(window.location.href);
-        return;
-    <?php endif; ?>
-    
-    // Redirigir a la página de reserva
+    // Construir URL de verificación con parámetros
     const params = new URLSearchParams({
         habitacion: propiedadId,
         f_llegada: fechaLlegada,
         f_salida: fechaSalida,
         huespedes: numHuespedes
     });
+    const urlReserva = base_url + 'reserva/verify?' + params.toString();
     
-    window.location.href = base_url + 'reserva/verify?' + params.toString();
+    <?php if (!isset($_SESSION['id_usuario'])): ?>
+        // Si no está logueado, ir a login con redirect a la URL de verificación
+        window.location.href = base_url + 'login?redirect=' + encodeURIComponent(urlReserva);
+        return;
+    <?php endif; ?>
+    
+    // Si está logueado, ir directo a verificar disponibilidad
+    window.location.href = urlReserva;
 }
 
 // Toggle favorito

@@ -162,7 +162,7 @@ class Propiedad extends Controller
         $this->views->getView('principal/catalogo', $data);
     }
 
-    // Verificar disponibilidad (AJAX)
+    // Verificar disponibilidad (AJAX) - Retorna JSON completo
     public function verificarDisponibilidad()
     {
         header('Content-Type: application/json');
@@ -173,18 +173,95 @@ class Propiedad extends Controller
             $fecha_fin = $_POST['fecha_fin'] ?? '';
             
             if ($id_habitacion && $fecha_inicio && $fecha_fin) {
-                $disponible = $this->model->verificarDisponibilidad($id_habitacion, $fecha_inicio, $fecha_fin);
+                // Verificar disponibilidad
+                $reservasConflicto = $this->model->getReservasConflicto($id_habitacion, $fecha_inicio, $fecha_fin);
+                $disponible = empty($reservasConflicto);
+                
+                // Obtener datos de la habitación para calcular precio
+                $habitacion = $this->model->getCasaDetalle($id_habitacion);
+                
+                // Calcular noches y precio
+                $fecha1 = new DateTime($fecha_inicio);
+                $fecha2 = new DateTime($fecha_fin);
+                $noches = $fecha2->diff($fecha1)->days;
+                
+                $precioNoche = floatval($habitacion['precio'] ?? 0);
+                $tarifaLimpieza = floatval($habitacion['tarifa_limpieza'] ?? 0);
+                $subtotal = $precioNoche * $noches;
+                $tarifaServicio = $subtotal * 0.12;
+                $total = $subtotal + $tarifaLimpieza + $tarifaServicio;
+                
+                // Obtener días ocupados si no está disponible
+                $diasOcupados = [];
+                if (!$disponible) {
+                    foreach ($reservasConflicto as $reserva) {
+                        $diasOcupados[] = [
+                            'inicio' => $reserva['fecha_ingreso'],
+                            'fin' => $reserva['fecha_salida']
+                        ];
+                    }
+                }
+                
                 echo json_encode([
                     'tipo' => 'success',
                     'disponible' => $disponible,
-                    'msg' => $disponible ? 'Fechas disponibles' : 'Fechas no disponibles'
-                ]);
+                    'mensaje' => $disponible ? '¡Fechas disponibles!' : 'Estas fechas no están disponibles',
+                    'noches' => $noches,
+                    'precio_noche' => $precioNoche,
+                    'subtotal' => $subtotal,
+                    'tarifa_limpieza' => $tarifaLimpieza,
+                    'tarifa_servicio' => $tarifaServicio,
+                    'precio_total' => $total,
+                    'dias_ocupados' => $diasOcupados
+                ], JSON_UNESCAPED_UNICODE);
             } else {
-                echo json_encode(['tipo' => 'error', 'msg' => 'Datos incompletos']);
+                echo json_encode(['tipo' => 'error', 'mensaje' => 'Datos incompletos']);
             }
         } else {
-            echo json_encode(['tipo' => 'error', 'msg' => 'Método no permitido']);
+            echo json_encode(['tipo' => 'error', 'mensaje' => 'Método no permitido']);
         }
+        die();
+    }
+    
+    // Obtener reservas para el calendario (formato FullCalendar)
+    public function getReservasCalendario()
+    {
+        header('Content-Type: application/json');
+        
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $f_llegada = $_GET['f_llegada'] ?? null;
+        $f_salida = $_GET['f_salida'] ?? null;
+        
+        $eventos = [];
+        
+        if ($id > 0) {
+            $reservas = $this->model->getReservasHabitacion($id);
+            
+            foreach ($reservas as $reserva) {
+                $eventos[] = [
+                    'id' => $reserva['id'],
+                    'title' => 'OCUPADO',
+                    'start' => $reserva['fecha_ingreso'],
+                    'end' => $reserva['fecha_salida'],
+                    'color' => '#dc3545',
+                    'textColor' => '#fff'
+                ];
+            }
+            
+            // Si hay fechas de consulta, mostrarlas en amarillo
+            if ($f_llegada && $f_salida) {
+                $eventos[] = [
+                    'id' => 'consulta',
+                    'title' => 'TU SELECCIÓN',
+                    'start' => $f_llegada,
+                    'end' => $f_salida,
+                    'color' => '#ffc107',
+                    'textColor' => '#000'
+                ];
+            }
+        }
+        
+        echo json_encode($eventos, JSON_UNESCAPED_UNICODE);
         die();
     }
 

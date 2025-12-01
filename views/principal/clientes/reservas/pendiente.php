@@ -1,125 +1,174 @@
 <?php
 include_once 'views/template/header-cliente.php';
-//session_start();
 error_reporting(0);
+
+// Variables de precio
+$precioNoche = floatval($data['habitacion']['precio'] ?? 0);
+$noches = intval($data['noches'] ?? 0);
+$subtotal = floatval($data['subtotal'] ?? 0);
+$tarifaLimpieza = floatval($data['tarifa_limpieza'] ?? 0);
+$tarifaServicio = floatval($data['tarifa_servicio'] ?? 0);
+$total = floatval($data['total'] ?? 0);
 ?>
 
-<div class="main-content">
-
-    <div class="container-fluid">
-        <div class="card">
-            <div class="card-body">
-                <h4 class="card-title">TU RESERVA</h4>
-                <?php if (!empty($_SESSION['reserva'])) { ?>
-                    <div
-                        class="alert alert-info alert-dismissible fade show"
-                        role="alert">
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="alert"
-                            aria-label="Close"></button>
-
-                        <strong>AVISO!</strong> Tienes una reserva pendiente
-                    </div>
-                    <hr>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <img
-                                src="<?php echo obtenerRutaImagenCasa($data['habitacion']['foto']); ?>"
-                                class="img-fluid rounded-top"
-                                alt="<?php echo htmlspecialchars($data['habitacion']['estilo']); ?>"
-                                onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'" />
-
-                            <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Habitacion: </strong>
-                                    <?php echo $data['habitacion']['estilo']; ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Fecha Llegada: </strong>
-                                    <?php echo fechaPerzo($_SESSION['reserva']['f_llegada']); ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Fecha Salida: </strong>
-                                    <?php echo fechaPerzo($_SESSION['reserva']['f_salida']); ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Precio | Noche: </strong>
-                                    <?php echo $data['habitacion']['precio']; ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Capacidad: </strong>
-                                    <?php echo $data['habitacion']['capacidad']; ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>N° Casa: </strong>
-                                    <?php echo $data['habitacion']['numero']; ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Descripcion: </strong>
-                                    <?php echo $data['habitacion']['descripcion']; ?>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <strong>Precio Total: </strong>
-                                    <?php echo $_SESSION['total']; ?>
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="accordion" id="accordionExample">
-                                <div class="accordion-item">
-                                    <h2 class="accordion-header" id="headingOne">
-                                        <button
-                                            class="accordion-button"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#collapseOne"
-                                            aria-expanded="true"
-                                            aria-controls="collapseOne">
-                                            PAYPAL
-                                        </button>
-                                    </h2>
-                                    <div
-                                        id="collapseOne"
-                                        class="accordion-collapse collapse show"
-                                        aria-labelledby="headingOne"
-                                        data-bs-parent="#accordionExample">
-                                        <div class="accordion-body">
-                                            <!-- Set up a container element for the button -->
-                                            <div id="paypal-button-container"></div>
+<div class="main-wrapper">
+    <div class="container">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="<?php echo RUTA_PRINCIPAL; ?>" class="text-decoration-none" style="color: var(--airbnb-pink);">Inicio</a></li>
+                <li class="breadcrumb-item active">Reserva Pendiente</li>
+            </ol>
+        </nav>
+        
+        <?php if (!empty($_SESSION['reserva'])) { ?>
+            <!-- Alerta de reserva pendiente -->
+            <div class="alert d-flex align-items-center mb-4" role="alert" style="background: linear-gradient(135deg, #FF385C15, #E31C5F10); border: 1px solid #FF385C30; border-radius: 12px;">
+                <i class="fas fa-clock me-3" style="color: var(--airbnb-pink); font-size: 24px;"></i>
+                <div>
+                    <strong style="color: var(--airbnb-pink);">Reserva Pendiente de Pago</strong>
+                    <p class="mb-0 text-muted small">Completa tu pago para confirmar la reservación</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Columna Izquierda - Detalles de la Propiedad -->
+                <div class="col-lg-7">
+                    <div class="card-airbnb">
+                        <div class="card-body p-0">
+                            <!-- Imagen principal -->
+                            <img src="<?php echo obtenerRutaImagenCasa($data['habitacion']['foto']); ?>"
+                                 class="w-100"
+                                 style="height: 280px; object-fit: cover;"
+                                 alt="<?php echo htmlspecialchars($data['habitacion']['estilo']); ?>"
+                                 onerror="this.src='<?php echo RUTA_PRINCIPAL; ?>assets/principal/images/default-casa.jpg'">
+                            
+                            <div class="p-4">
+                                <h4 class="fw-bold mb-1"><?php echo htmlspecialchars($data['habitacion']['estilo']); ?></h4>
+                                <p class="text-muted mb-4">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <?php echo htmlspecialchars($data['habitacion']['direccion'] ?? 'Tecolutla, Veracruz'); ?>
+                                </p>
+                                
+                                <!-- Fechas -->
+                                <div class="row mb-4">
+                                    <div class="col-6">
+                                        <div class="p-3 rounded-3" style="background: var(--airbnb-bg);">
+                                            <small class="text-muted d-block">LLEGADA</small>
+                                            <strong><?php echo fechaPerzo($_SESSION['reserva']['f_llegada']); ?></strong>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="p-3 rounded-3" style="background: var(--airbnb-bg);">
+                                            <small class="text-muted d-block">SALIDA</small>
+                                            <strong><?php echo fechaPerzo($_SESSION['reserva']['f_salida']); ?></strong>
                                         </div>
                                     </div>
                                 </div>
-
-
+                                
+                                <!-- Características -->
+                                <div class="d-flex flex-wrap gap-3 mb-4">
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                                        <i class="fas fa-user-friends me-1"></i> <?php echo $data['habitacion']['capacidad']; ?> huéspedes
+                                    </span>
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                                        <i class="fas fa-home me-1"></i> Casa #<?php echo $data['habitacion']['numero']; ?>
+                                    </span>
+                                    <span class="badge bg-light text-dark px-3 py-2 rounded-pill">
+                                        <i class="fas fa-moon me-1"></i> <?php echo $noches; ?> noche<?php echo $noches > 1 ? 's' : ''; ?>
+                                    </span>
+                                </div>
+                                
+                                <!-- Descripción -->
+                                <?php if (!empty($data['habitacion']['descripcion'])): ?>
+                                <p class="text-muted">
+                                    <?php echo htmlspecialchars($data['habitacion']['descripcion']); ?>
+                                </p>
+                                <?php endif; ?>
                             </div>
-
                         </div>
                     </div>
-
-
-                <?php } else { ?>
-                    <div
-                        class="alert alert-warning alert-dismissible fade show"
-                        role="alert">
-                        <button
-                            type="button"
-                            class="btn-close"
-                            data-bs-dismiss="alert"
-                            aria-label="Close"></button>
-
-                        <strong>AVISO!</strong> No tienes ninguna reserva pendiente
+                </div>
+                
+                <!-- Columna Derecha - Resumen y Pago -->
+                <div class="col-lg-5">
+                    <!-- Card de Resumen de Pago -->
+                    <div class="card-airbnb mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-receipt me-2" style="color: var(--airbnb-pink);"></i> Resumen de Pago</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Desglose -->
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">$<?php echo number_format($precioNoche, 2); ?> MXN x <?php echo $noches; ?> noche<?php echo $noches > 1 ? 's' : ''; ?></span>
+                                <span>$<?php echo number_format($subtotal, 2); ?> MXN</span>
+                            </div>
+                            
+                            <?php if ($tarifaLimpieza > 0): ?>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tarifa de limpieza</span>
+                                <span>$<?php echo number_format($tarifaLimpieza, 2); ?> MXN</span>
+                            </div>
+                            <?php endif; ?>
+                            
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="text-muted">Tarifa de servicio</span>
+                                <span>$<?php echo number_format($tarifaServicio, 2); ?> MXN</span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- Total -->
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="fs-5">Total</strong>
+                                <strong class="fs-4" style="color: var(--airbnb-pink);">$<?php echo number_format($total, 2); ?> MXN</strong>
+                            </div>
+                        </div>
                     </div>
-                <?php    } ?>
+                    
+                    <!-- Card de Método de Pago -->
+                    <div class="card-airbnb">
+                        <div class="card-header">
+                            <h5><i class="fas fa-credit-card me-2" style="color: var(--airbnb-pink);"></i> Método de Pago</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">Completa tu pago de forma segura con PayPal</p>
+                            
+                            <!-- Contenedor PayPal -->
+                            <div id="paypal-button-container"></div>
+                            
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-lock me-1"></i> Pago seguro procesado por PayPal
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón cancelar -->
+                    <div class="text-center mt-4">
+                        <a href="<?php echo RUTA_PRINCIPAL; ?>catalogo" class="btn btn-outline-airbnb">
+                            <i class="fas fa-times me-2"></i> Cancelar Reserva
+                        </a>
+                    </div>
+                </div>
             </div>
-        </div>
+            
+        <?php } else { ?>
+            <!-- Sin reservas pendientes -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-calendar-check" style="font-size: 80px; color: var(--airbnb-light-gray);"></i>
+                </div>
+                <h3 class="fw-bold mb-2">No tienes reservas pendientes</h3>
+                <p class="text-muted mb-4">¿Listo para tu próxima aventura? Explora nuestras casas disponibles.</p>
+                <a href="<?php echo RUTA_PRINCIPAL; ?>catalogo" class="btn btn-airbnb">
+                    <i class="fas fa-search me-2"></i> Explorar Casas
+                </a>
+            </div>
+        <?php } ?>
     </div>
 </div>
-
-
-
-
 
 
 <?php
