@@ -56,6 +56,16 @@ class AdminModel extends Query
                        r.id_habitacion,
                        r.id_usuario,
                        r.precio,
+                       r.estado_pago,
+                       r.id_transaccion,
+                       r.metodo_pago,
+                       r.fecha_pago,
+                       r.email_pagador,
+                       r.monto_subtotal,
+                       r.tarifa_limpieza,
+                       r.tarifa_servicio,
+                       r.monto_anfitrion,
+                       r.requiere_factura,
                        CONCAT(u.nombre, ' ', u.apellido) as nombre_usuario,
                        h.estilo as nombre_habitacion,
                        h.precio as precio_por_noche
@@ -83,6 +93,16 @@ class AdminModel extends Query
                        r.id_habitacion,
                        r.id_usuario,
                        r.precio,
+                       r.estado_pago,
+                       r.id_transaccion,
+                       r.metodo_pago,
+                       r.fecha_pago,
+                       r.email_pagador,
+                       r.monto_subtotal,
+                       r.tarifa_limpieza,
+                       r.tarifa_servicio,
+                       r.monto_anfitrion,
+                       r.requiere_factura,
                        CONCAT(u.nombre, ' ', u.apellido) as nombre_usuario,
                        h.estilo as nombre_habitacion,
                        h.precio as precio_por_noche
@@ -573,5 +593,12 @@ class AdminModel extends Query
             return $this->save($sql, [$stats['promedio_general'] ?? 0, $stats['total_evaluaciones'] ?? 0, $id_habitacion]);
         }
         return false;
+    }
+    
+    // Obtener datos de facturación por reserva
+    public function getDatosFacturacion($id_reserva)
+    {
+        $sql = "SELECT * FROM datos_facturacion WHERE id_reserva = ?";
+        return $this->select($sql, [$id_reserva]);
     }
 }

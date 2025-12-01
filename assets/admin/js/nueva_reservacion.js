@@ -102,7 +102,7 @@ function llenarTablaReservaciones(reservaciones) {
     tbody.innerHTML = '';
 
     if (!reservaciones || reservaciones.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No hay reservaciones</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted py-4"><i class="fas fa-inbox fa-2x mb-2 d-block"></i>No hay reservaciones</td></tr>';
         contador.innerHTML = '<i class="fas fa-list me-1"></i>0 reservaciones';
         return;
     }
@@ -145,6 +145,46 @@ function llenarTablaReservaciones(reservaciones) {
         const estadoClase = estadoInt === 1 ? 'bg-success' : 'bg-danger';
         const codReserva = reserva.cod_reserva || '';
         
+        // Datos de pago
+        const estadoPago = reserva.estado_pago || 'pendiente';
+        const idTransaccion = reserva.id_transaccion || '';
+        const metodoPago = reserva.metodo_pago || '';
+        const fechaPago = reserva.fecha_pago || '';
+        const emailPagador = reserva.email_pagador || '';
+        const montoSubtotal = parseFloat(reserva.monto_subtotal || 0);
+        const tarifaLimpieza = parseFloat(reserva.tarifa_limpieza || 0);
+        const tarifaServicio = parseFloat(reserva.tarifa_servicio || 0);
+        const montoAnfitrion = parseFloat(reserva.monto_anfitrion || 0);
+        
+        // Datos de facturación
+        const requiereFactura = parseInt(reserva.requiere_factura || 0);
+        
+        // Generar HTML de columna de pago
+        let pagoHtml = '';
+        if (estadoPago === 'pagado') {
+            pagoHtml = `
+                <button class="btn btn-sm btn-success" onclick="verDetallePago(${id}, '${idTransaccion}', '${metodoPago}', '${fechaPago}', '${emailPagador}', ${montoSubtotal}, ${tarifaLimpieza}, ${tarifaServicio}, ${precioTotal}, ${montoAnfitrion})" title="Ver detalles del pago">
+                    <i class="fas fa-check-circle"></i>
+                </button>
+            `;
+        } else if (estadoPago === 'reembolsado') {
+            pagoHtml = `<span class="badge bg-warning text-dark"><i class="fas fa-undo me-1"></i>Reembolsado</span>`;
+        } else {
+            pagoHtml = `<span class="badge bg-secondary"><i class="fas fa-clock me-1"></i>Pendiente</span>`;
+        }
+        
+        // Generar HTML de columna de factura
+        let facturaHtml = '';
+        if (requiereFactura === 1) {
+            facturaHtml = `
+                <button class="btn btn-sm btn-primary" onclick="verFacturacion(${id})" title="Ver datos de facturación">
+                    <i class="fas fa-file-invoice"></i>
+                </button>
+            `;
+        } else {
+            facturaHtml = `<span class="badge bg-light text-muted"><i class="fas fa-minus"></i></span>`;
+        }
+        
         const fila = document.createElement('tr');
         fila.id = `reserva-${id}`;
         fila.setAttribute('data-reserva-id', id);
@@ -159,6 +199,8 @@ function llenarTablaReservaciones(reservaciones) {
             <td><strong>${fechaSalidaFormateada}</strong></td>
             <td><span class="badge bg-info">${noches > 0 ? noches : '0'} noche${noches !== 1 ? 's' : ''}</span></td>
             <td><strong class="text-success">$${precioTotal.toFixed(2)}</strong></td>
+            <td>${pagoHtml}</td>
+            <td>${facturaHtml}</td>
             <td><span class="badge ${estadoClase}">${estadoTexto}</span></td>
             <td>
                 <div class="btn-group btn-group-sm">
@@ -174,6 +216,22 @@ function llenarTablaReservaciones(reservaciones) {
         
         tbody.appendChild(fila);
     });
+}
+
+// Función para ver detalle de pago
+function verDetallePago(id, idTransaccion, metodoPago, fechaPago, emailPagador, subtotal, limpieza, servicio, total, anfitrion) {
+    document.getElementById('detalle_id_transaccion').textContent = idTransaccion || 'N/A';
+    document.getElementById('detalle_metodo').textContent = metodoPago ? metodoPago.toUpperCase() : 'N/A';
+    document.getElementById('detalle_fecha_pago').textContent = fechaPago ? new Date(fechaPago).toLocaleString('es-ES') : 'N/A';
+    document.getElementById('detalle_email').textContent = emailPagador || 'N/A';
+    document.getElementById('detalle_subtotal').textContent = '$' + subtotal.toFixed(2);
+    document.getElementById('detalle_limpieza').textContent = '$' + limpieza.toFixed(2);
+    document.getElementById('detalle_servicio').textContent = '$' + servicio.toFixed(2);
+    document.getElementById('detalle_total').textContent = '$' + total.toFixed(2);
+    document.getElementById('detalle_anfitrion').textContent = '$' + anfitrion.toFixed(2);
+    document.getElementById('detalle_comision').textContent = '$' + servicio.toFixed(2);
+    
+    new bootstrap.Modal(document.getElementById('modalDetallePago')).show();
 }
 
 function limpiarFormulario() {
@@ -454,3 +512,51 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Función para ver datos de facturación
+function verFacturacion(idReserva) {
+    fetch(base_url + 'getFacturacion/' + idReserva)
+        .then(response => response.json())
+        .then(data => {
+            if (data.tipo === 'success' && data.datos) {
+                const d = data.datos;
+                
+                // Llenar modal
+                document.getElementById('fact_tipo_persona').textContent = d.tipo_persona === 'moral' ? 'Persona Moral (Empresa)' : 'Persona Física';
+                document.getElementById('fact_rfc').textContent = d.rfc || 'N/A';
+                document.getElementById('fact_razon_social').textContent = d.razon_social || 'N/A';
+                document.getElementById('fact_regimen').textContent = d.regimen_fiscal || 'N/A';
+                document.getElementById('fact_cp').textContent = d.codigo_postal || 'N/A';
+                document.getElementById('fact_uso_cfdi').textContent = d.uso_cfdi || 'N/A';
+                document.getElementById('fact_correo').textContent = d.correo_factura || 'N/A';
+                document.getElementById('fact_telefono').textContent = d.telefono || 'No especificado';
+                document.getElementById('fact_direccion').textContent = d.direccion || 'No especificada';
+                
+                // Estado de factura con badge
+                let estadoBadge = '';
+                switch(d.estado) {
+                    case 'pendiente':
+                        estadoBadge = '<span class="badge bg-warning">Pendiente</span>';
+                        break;
+                    case 'procesada':
+                        estadoBadge = '<span class="badge bg-info">Procesada</span>';
+                        break;
+                    case 'enviada':
+                        estadoBadge = '<span class="badge bg-success">Enviada</span>';
+                        break;
+                    default:
+                        estadoBadge = '<span class="badge bg-secondary">Sin estado</span>';
+                }
+                document.getElementById('fact_estado').innerHTML = estadoBadge;
+                
+                // Mostrar modal
+                new bootstrap.Modal(document.getElementById('modalFacturacion')).show();
+            } else {
+                alertSW(data.msg || 'No se pudieron obtener los datos de facturación', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alertSW('Error al obtener datos de facturación', 'error');
+        });
+}

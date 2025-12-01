@@ -219,6 +219,8 @@
                                     <th><i class="fas fa-calendar-minus me-1"></i>Fecha Salida</th>
                                     <th><i class="fas fa-moon me-1"></i>Noches</th>
                                     <th><i class="fas fa-dollar-sign me-1"></i>Precio Total</th>
+                                    <th><i class="fas fa-credit-card me-1"></i>Pago</th>
+                                    <th><i class="fas fa-file-invoice me-1"></i>Factura</th>
                                     <th><i class="fas fa-info-circle me-1"></i>Estado</th>
                                     <th><i class="fas fa-cogs me-1"></i>Acciones</th>
                                 </tr>
@@ -227,6 +229,132 @@
                                 <!-- Las reservaciones se cargarán aquí dinámicamente -->
                             </tbody>
                         </table>
+                    </div>
+                    
+                    <!-- Modal de Detalles de Pago -->
+                    <div class="modal fade" id="modalDetallePago" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-success text-white">
+                                    <h5 class="modal-title"><i class="fas fa-receipt me-2"></i>Detalles del Pago</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">ID Transacción PayPal:</label>
+                                        <p id="detalle_id_transaccion" class="mb-1 font-monospace"></p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">Método de Pago:</label>
+                                        <p id="detalle_metodo" class="mb-1"></p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">Fecha de Pago:</label>
+                                        <p id="detalle_fecha_pago" class="mb-1"></p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">Email del Pagador:</label>
+                                        <p id="detalle_email" class="mb-1"></p>
+                                    </div>
+                                    <hr>
+                                    <h6 class="text-primary">Desglose Financiero:</h6>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Subtotal (noches):</td>
+                                            <td class="text-end" id="detalle_subtotal"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tarifa de limpieza:</td>
+                                            <td class="text-end" id="detalle_limpieza"></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Tarifa de servicio (comisión):</td>
+                                            <td class="text-end text-success" id="detalle_servicio"></td>
+                                        </tr>
+                                        <tr class="table-primary">
+                                            <td><strong>Total Cobrado:</strong></td>
+                                            <td class="text-end"><strong id="detalle_total"></strong></td>
+                                        </tr>
+                                        <tr class="table-warning">
+                                            <td>Monto Anfitrión:</td>
+                                            <td class="text-end" id="detalle_anfitrion"></td>
+                                        </tr>
+                                        <tr class="table-success">
+                                            <td><strong>Comisión Ganada:</strong></td>
+                                            <td class="text-end"><strong id="detalle_comision"></strong></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal de Datos de Facturación -->
+                    <div class="modal fade" id="modalFacturacion" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title"><i class="fas fa-file-invoice me-2"></i>Datos de Facturación</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Tipo de Persona:</label>
+                                            <p id="fact_tipo_persona" class="mb-0"></p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">RFC:</label>
+                                            <p id="fact_rfc" class="mb-0 font-monospace"></p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">Razón Social / Nombre:</label>
+                                        <p id="fact_razon_social" class="mb-0"></p>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Régimen Fiscal:</label>
+                                            <p id="fact_regimen" class="mb-0"></p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Código Postal:</label>
+                                            <p id="fact_cp" class="mb-0"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Uso de CFDI:</label>
+                                            <p id="fact_uso_cfdi" class="mb-0"></p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Correo para Factura:</label>
+                                            <p id="fact_correo" class="mb-0"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Teléfono:</label>
+                                            <p id="fact_telefono" class="mb-0"></p>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="fw-bold text-muted">Estado:</label>
+                                            <p id="fact_estado" class="mb-0"></p>
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="fw-bold text-muted">Dirección:</label>
+                                        <p id="fact_direccion" class="mb-0"></p>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

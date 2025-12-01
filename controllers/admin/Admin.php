@@ -224,6 +224,37 @@ class Admin extends Controller
         }
     }
 
+    public function getFacturacion($id_reserva = '')
+    {
+        header('Content-Type: application/json');
+        
+        if (!isset($_SESSION['id_admin'])) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'No autorizado']);
+            die();
+        }
+        
+        $id = intval($id_reserva);
+        if ($id <= 0) {
+            echo json_encode(['tipo' => 'error', 'msg' => 'ID inválido']);
+            die();
+        }
+        
+        $datos = $this->model->getDatosFacturacion($id);
+        
+        if ($datos) {
+            echo json_encode([
+                'tipo' => 'success',
+                'datos' => $datos
+            ]);
+        } else {
+            echo json_encode([
+                'tipo' => 'error',
+                'msg' => 'No se encontraron datos de facturación'
+            ]);
+        }
+        die();
+    }
+
     public function crearReserva()
     {
         if (!isset($_SESSION['id_admin'])) {

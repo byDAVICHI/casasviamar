@@ -33,9 +33,9 @@ if ($isProduction) {
 define('RUTA_ADMIN', RUTA_PRINCIPAL . ADMIN . '/');
 define('CHARSET', 'charset=utf8');
 define('TITLE', 'VIA-MAR');
-// CREDENCIALES PAYPAL
-define('MONEDA_PAYPAL', 'USD');
-define('CLIENTE_ID', 'ARbJgmCyDLc0AaAYm8r-QGI3kWvrawyt-jITk-pOhH6sh_bkPHwa0Qr5j7CVWLUVGp7OHP1wFPG08Ko2');
+// CREDENCIALES PAYPAL - PRODUCCIÓN
+define('MONEDA_PAYPAL', 'MXN');
+define('CLIENTE_ID', 'AVXAzCyv3kuxUXcIIPeaKq9MKByXsYYYBDyI6qFbcp-v94gBkpmtTWhxs8Uy_HEiO9CXgujlvFf6Y_wj');
 // CREDENCIALES MERCADO PAGO
 define('PUBLIC_KEY', 'TESTUSER2075515844');
 define('ACCESS_TOKEN','5pv5EilDTs');
