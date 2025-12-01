@@ -1,4 +1,15 @@
 RewriteEngine on
+
+# Forzar redirección a www para evitar problemas de CORS
+RewriteCond %{HTTP_HOST} ^casasviamar\.com$ [NC]
+RewriteRule ^(.*)$ https://www.casasviamar.com/$1 [R=301,L]
+
+# Headers CORS para fuentes
+<FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css|css)$">
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
+
+# Routing principal
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
