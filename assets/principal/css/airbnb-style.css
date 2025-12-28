@@ -2,6 +2,34 @@
    ESTILOS AIRBNB - ALQUILER VACACIONAL
    ===================================================== */
 
+/* Ocultar hero del template principal en página de detalle */
+body:has(.detalle-container) .site-hero {
+    display: none !important;
+}
+
+/* Header fijo blanco para página de detalle */
+body:has(.detalle-container) .site-header {
+    background: #fff !important;
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+body:has(.detalle-container) .site-header .site-logo a {
+    color: #222 !important;
+}
+
+body:has(.detalle-container) .header-controls .lang-btn {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #222;
+}
+
+body:has(.detalle-container) .header-controls .site-menu-toggle span {
+    background: #222;
+}
+
 :root {
     --airbnb-primary: #FF385C;
     --airbnb-primary-dark: #E31C5F;
@@ -1028,44 +1056,611 @@
 
 /* ==================== RESPONSIVE ==================== */
 
-@media (max-width: 768px) {
+/* Tablets Landscape (992px - 1199px) */
+@media (max-width: 1199px) {
     .detalle-container {
-        padding: 16px;
+        padding: 20px;
+    }
+    
+    .detalle-content {
+        grid-template-columns: 1fr 340px;
+        gap: 48px;
+    }
+    
+    .reserva-widget {
+        padding: 20px;
+    }
+}
+
+/* Tablets (768px - 991px) */
+@media (max-width: 991px) {
+    .detalle-content {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+    
+    /* Widget de reserva se mantiene visible pero no sticky */
+    .reserva-widget {
+        position: relative;
+        top: 0;
+        order: -1; /* Mover arriba en móvil */
+        margin-bottom: 24px;
+    }
+    
+    .galeria-hero {
+        max-height: 380px;
+    }
+    
+    .evaluaciones-barras {
+        grid-template-columns: 1fr 1fr;
+    }
+    
+    .mapa-container {
+        height: 350px;
+    }
+}
+
+/* Móviles grandes (576px - 767px) */
+@media (max-width: 767px) {
+    .detalle-container {
+        padding: 0 !important;
+        padding-bottom: 80px !important; /* Espacio para barra fija */
+        background: #fff;
+        min-height: auto;
+    }
+    
+    /* Header del detalle */
+    .detalle-header {
+        padding: 12px 16px;
+        margin-bottom: 0;
+        background: #fff;
     }
     
     .detalle-title {
-        font-size: 22px;
+        font-size: 20px;
+        line-height: 1.3;
+        margin: 0 0 8px 0;
     }
     
+    .detalle-subtitle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .detalle-subtitle .separator {
+        display: none;
+    }
+    
+    .detalle-actions {
+        margin-left: 0;
+        margin-top: 8px;
+        width: 100%;
+        justify-content: flex-start;
+    }
+    
+    /* Galería Hero móvil */
+    .galeria-hero {
+        grid-template-columns: 1fr;
+        max-height: 250px !important;
+        height: 250px;
+        border-radius: 0;
+        margin-bottom: 0;
+        overflow: hidden;
+    }
+    
+    .galeria-hero-main {
+        grid-row: span 1;
+        position: relative;
+        height: 250px;
+    }
+    
+    .galeria-hero-main img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+    }
+    
+    .galeria-hero-main::after {
+        content: 'Ver fotos';
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(255,255,255,0.95);
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 600;
+        pointer-events: none;
+        z-index: 5;
+    }
+    
+    .galeria-hero-grid {
+        display: none !important;
+    }
+    
+    /* Contenido principal */
+    .detalle-content {
+        padding: 0 16px;
+    }
+    
+    .detalle-info {
+        border-top: none;
+        padding-top: 16px;
+    }
+    
+    /* Host info */
+    .info-host {
+        flex-direction: row;
+        padding-bottom: 20px;
+    }
+    
+    .info-host-details h2 {
+        font-size: 18px;
+    }
+    
+    .info-host-details p {
+        font-size: 13px;
+    }
+    
+    .info-host-avatar {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+    }
+    
+    /* Highlights */
+    .info-highlights {
+        padding: 20px 0;
+    }
+    
+    .highlight-item {
+        margin-bottom: 20px;
+    }
+    
+    .highlight-icon {
+        font-size: 20px;
+        width: 28px;
+    }
+    
+    .highlight-text h4 {
+        font-size: 15px;
+    }
+    
+    .highlight-text p {
+        font-size: 13px;
+    }
+    
+    /* Descripción */
+    .info-descripcion {
+        padding: 20px 0;
+    }
+    
+    .info-descripcion p {
+        font-size: 15px;
+    }
+    
+    /* Secciones generales */
+    .info-dormitorio h3,
+    .info-amenidades h3,
+    .info-calendario h3,
+    .info-mapa h3 {
+        font-size: 18px;
+    }
+    
+    .info-dormitorio,
+    .info-amenidades,
+    .info-calendario {
+        padding: 20px 0;
+    }
+    
+    /* Dormitorio */
+    .dormitorio-card {
+        max-width: 100%;
+    }
+    
+    /* Amenidades */
+    .amenidades-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .amenidad-item {
+        font-size: 15px;
+    }
+    
+    .amenidad-item i {
+        font-size: 20px;
+        width: 20px;
+    }
+    
+    .btn-mostrar-amenidades {
+        width: 100%;
+        padding: 12px 20px;
+    }
+    
+    /* Calendario inline oculto en móvil */
+    .info-calendario {
+        display: none;
+    }
+    
+    /* Widget de reserva móvil - Barra fija inferior */
     .reserva-widget {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
+        top: auto;
         border-radius: 0;
         border: none;
         border-top: 1px solid var(--airbnb-light-gray);
-        padding: 16px;
+        padding: 12px 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: var(--airbnb-white);
-        z-index: 100;
+        z-index: 1000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 0;
+        order: 0;
+    }
+    
+    .reserva-widget .reserva-precio {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0;
+        margin-bottom: 0;
+    }
+    
+    .reserva-widget .reserva-precio-valor {
+        font-size: 18px;
+    }
+    
+    .reserva-widget .reserva-precio-periodo {
+        font-size: 14px;
+    }
+    
+    .reserva-widget .reserva-rating {
+        display: none;
     }
     
     .reserva-widget .reserva-form,
     .reserva-widget .reserva-desglose,
-    .reserva-widget .reserva-nota {
-        display: none;
+    .reserva-widget .reserva-nota,
+    .reserva-widget .ver-calendario,
+    .reserva-widget .disponibilidad-feedback {
+        display: none !important;
     }
     
     .reserva-widget .btn-reservar {
         width: auto;
-        padding: 14px 32px;
+        padding: 12px 24px;
+        font-size: 15px;
+        margin: 0;
     }
     
-    .amenidades-grid {
+    /* Evaluaciones */
+    .info-evaluaciones {
+        padding: 20px 0;
+        margin: 0 16px;
+    }
+    
+    .evaluaciones-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .evaluaciones-header i {
+        font-size: 24px !important;
+    }
+    
+    .evaluaciones-score {
+        font-size: 40px;
+    }
+    
+    .evaluaciones-barras {
         grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .barra-item {
+        flex-wrap: nowrap;
+    }
+    
+    .barra-label {
+        font-size: 13px;
+        min-width: 100px;
+    }
+    
+    .evaluaciones-lista {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .evaluacion-item {
+        padding-right: 0;
+    }
+    
+    .evaluacion-texto {
+        font-size: 14px;
+    }
+    
+    /* Mapa */
+    .info-mapa {
+        padding: 20px 16px;
+        margin: 0;
+    }
+    
+    .mapa-container {
+        height: 280px;
+        border-radius: 8px;
+    }
+    
+    /* Modal Galería móvil */
+    .modal-galeria-header {
+        padding: 12px 16px;
+    }
+    
+    .modal-galeria-content {
+        padding: 16px;
+    }
+}
+
+/* Móviles pequeños (hasta 575px) */
+@media (max-width: 575px) {
+    .detalle-title {
+        font-size: 20px;
+    }
+    
+    .galeria-hero {
+        max-height: 240px;
+    }
+    
+    .info-host-details h2 {
+        font-size: 16px;
+    }
+    
+    .reserva-widget {
+        padding: 10px 12px;
+    }
+    
+    .reserva-widget .reserva-precio-valor {
+        font-size: 16px;
+    }
+    
+    .reserva-widget .btn-reservar {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    
+    .evaluaciones-score {
+        font-size: 32px;
+    }
+    
+    .mapa-container {
+        height: 240px;
+    }
+}
+
+/* ==================== MODAL DE RESERVA MÓVIL ==================== */
+
+.modal-reserva-movil {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 2000;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.modal-reserva-movil.active {
+    display: flex;
+}
+
+.modal-reserva-content {
+    background: var(--airbnb-white);
+    width: 100%;
+    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+    overflow-y: auto;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.modal-reserva-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+    position: sticky;
+    top: 0;
+    background: var(--airbnb-white);
+    z-index: 10;
+}
+
+.modal-reserva-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-reserva-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    color: var(--airbnb-dark);
+}
+
+.modal-reserva-body {
+    padding: 20px 16px;
+}
+
+.modal-reserva-body .reserva-precio {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.modal-reserva-body .reserva-form {
+    border: 1px solid var(--airbnb-light-gray);
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.modal-reserva-body .reserva-fechas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.modal-reserva-body .reserva-fecha-input {
+    padding: 12px;
+    border: none;
+    border-bottom: 1px solid var(--airbnb-light-gray);
+}
+
+.modal-reserva-body .reserva-fecha-input:first-child {
+    border-right: 1px solid var(--airbnb-light-gray);
+}
+
+.modal-reserva-body .reserva-fecha-input label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    color: var(--airbnb-dark);
+}
+
+.modal-reserva-body .reserva-fecha-input input {
+    width: 100%;
+    border: none;
+    font-size: 14px;
+    padding: 0;
+    outline: none;
+    background: transparent;
+}
+
+.modal-reserva-body .reserva-huespedes {
+    padding: 12px;
+    cursor: pointer;
+}
+
+.modal-reserva-body .reserva-huespedes label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.modal-reserva-body .reserva-huespedes-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.modal-reserva-body .ver-calendario {
+    text-align: center;
+    margin: 12px 0;
+}
+
+.modal-reserva-body .ver-calendario a {
+    color: var(--airbnb-dark);
+    text-decoration: underline;
+    font-size: 14px;
+}
+
+.modal-reserva-body .disponibilidad-feedback {
+    margin: 12px 0;
+}
+
+.modal-reserva-body .btn-reservar {
+    width: 100%;
+    margin-top: 16px;
+}
+
+.modal-reserva-body .reserva-nota {
+    text-align: center;
+    font-size: 14px;
+    color: var(--airbnb-gray);
+    margin-top: 12px;
+}
+
+.modal-reserva-body .reserva-desglose {
+    padding-top: 20px;
+    border-top: 1px solid var(--airbnb-light-gray);
+    margin-top: 20px;
+}
+
+/* ==================== RESPONSIVE ADICIONAL PARA MODALES ==================== */
+
+@media (max-width: 767px) {
+    /* Modal de calendario responsive */
+    .modal-dialog.modal-lg {
+        margin: 0;
+        max-width: 100%;
+        height: 100%;
+    }
+    
+    .modal-dialog.modal-lg .modal-content {
+        height: 100%;
+        border-radius: 0;
+    }
+    
+    #calendarioDisponibilidad {
+        min-height: 300px !important;
+    }
+    
+    /* Ajustes para FullCalendar en móvil */
+    .fc .fc-toolbar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 16px !important;
+    }
+    
+    .fc .fc-button {
+        padding: 6px 10px !important;
+        font-size: 12px !important;
+    }
+}
+
+/* ==================== ESTILOS PARA RATING EN MÓVIL ==================== */
+
+@media (max-width: 767px) {
+    .reserva-widget .reserva-precio {
+        flex: 1;
+    }
+    
+    /* Mostrar link de fechas debajo del precio en móvil */
+    .reserva-widget .reserva-precio::after {
+        content: 'Seleccionar fechas';
+        display: block;
+        font-size: 12px;
+        text-decoration: underline;
+        color: var(--airbnb-dark);
+        margin-top: 2px;
     }
 }
 
