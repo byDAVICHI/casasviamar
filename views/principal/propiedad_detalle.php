@@ -27,6 +27,83 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
 <!-- Leaflet CSS para mapa -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
+<!-- Estilos específicos para página de detalle - Ocultar hero y header transparente -->
+<style>
+    /* Ocultar hero del template principal COMPLETAMENTE */
+    .site-hero,
+    .site-hero.overlay,
+    section.site-hero {
+        display: none !important;
+        height: 0 !important;
+        min-height: 0 !important;
+        max-height: 0 !important;
+        overflow: hidden !important;
+        visibility: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Header fijo blanco */
+    header.site-header,
+    .site-header.js-site-header {
+        background: #fff !important;
+        position: sticky !important;
+        top: 0;
+        z-index: 1000;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        padding: 10px 0;
+    }
+    
+    .site-header .site-logo a,
+    .site-logo a {
+        color: #222 !important;
+    }
+    
+    .header-controls .lang-btn {
+        background: rgba(0, 0, 0, 0.05) !important;
+        border-color: rgba(0, 0, 0, 0.1) !important;
+        color: #222 !important;
+    }
+    
+    .header-controls .site-menu-toggle span {
+        background: #222 !important;
+    }
+    
+    /* Body con fondo blanco */
+    body {
+        background: #fff !important;
+    }
+    
+    /* Footer ajuste */
+    .site-footer {
+        margin-top: 0;
+    }
+    
+    /* Asegurar que el contenido empiece desde arriba */
+    .detalle-container {
+        margin-top: 0;
+        padding-top: 0;
+    }
+    
+    /* Responsive móvil - Barra inferior */
+    @media (max-width: 767px) {
+        .detalle-container {
+            padding-bottom: 80px !important;
+        }
+    }
+</style>
+
+<!-- Script para remover el hero del DOM -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Remover el hero section del DOM
+    const heroSection = document.querySelector('.site-hero');
+    if (heroSection) {
+        heroSection.remove();
+    }
+});
+</script>
+
 <div class="detalle-container">
     <!-- Header -->
     <div class="detalle-header">
@@ -260,7 +337,7 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
                 </div>
             </div>
 
-            <button class="btn-reservar" id="btnReservar" onclick="iniciarReserva()" disabled>
+            <button class="btn-reservar" id="btnReservar" onclick="handleReservarClick()" disabled>
                 Reservar
             </button>
 
@@ -390,6 +467,97 @@ $fotoPrincipal = obtenerRutaImagenCasa($propiedad['foto']);
     <div class="modal-galeria-content">
         <div class="modal-galeria-grid" id="galeriaGrid">
             <!-- Se llena dinámicamente -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Reserva para Móvil -->
+<div class="modal-reserva-movil" id="modalReservaMovil">
+    <div class="modal-reserva-content">
+        <div class="modal-reserva-header">
+            <h3>Reservar esta propiedad</h3>
+            <button class="modal-reserva-close" onclick="cerrarModalReserva()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-reserva-body">
+            <div class="reserva-precio">
+                <span class="reserva-precio-valor">$<?php echo number_format($precioNoche, 2); ?> MXN</span>
+                <span class="reserva-precio-periodo">por noche</span>
+                <?php if ($rating > 0): ?>
+                    <div class="reserva-rating" style="display: flex; margin-left: auto;">
+                        <i class="fas fa-star"></i>
+                        <span><?php echo $rating; ?></span>
+                        <span class="text-muted">· <?php echo $totalEvaluaciones; ?> evaluaciones</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="reserva-form">
+                <div class="reserva-fechas">
+                    <div class="reserva-fecha-input">
+                        <label>LLEGADA</label>
+                        <input type="date" id="modal_fecha_llegada" name="modal_fecha_llegada" 
+                               min="<?php echo date('Y-m-d'); ?>"
+                               onchange="sincronizarFechas('llegada')">
+                    </div>
+                    <div class="reserva-fecha-input">
+                        <label>SALIDA</label>
+                        <input type="date" id="modal_fecha_salida" name="modal_fecha_salida"
+                               min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
+                               onchange="sincronizarFechas('salida')">
+                    </div>
+                </div>
+                
+                <div class="reserva-huespedes" onclick="toggleHuespedesModal()">
+                    <label>HUÉSPEDES</label>
+                    <div class="reserva-huespedes-selector">
+                        <span id="modal_huespedes_texto">1 huésped</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Enlace al calendario -->
+            <div class="ver-calendario">
+                <a href="#" onclick="abrirCalendarioDesdeModal(); return false;">
+                    <i class="fas fa-calendar-alt"></i> Ver calendario de disponibilidad
+                </a>
+            </div>
+            
+            <!-- Feedback de disponibilidad en modal -->
+            <div id="modal-disponibilidad-feedback" class="disponibilidad-feedback" style="display: none;">
+                <div class="feedback-content">
+                    <span id="modal-feedback-mensaje"></span>
+                </div>
+            </div>
+
+            <button class="btn-reservar" id="btnReservarModal" onclick="iniciarReserva()" disabled>
+                Reservar
+            </button>
+
+            <p class="reserva-nota">Aún no se te cobrará nada</p>
+
+            <div class="reserva-desglose" id="modal-desglose" style="display: none;">
+                <div class="desglose-item">
+                    <span>$<?php echo number_format($precioNoche, 2); ?> MXN x <span id="modal_num_noches">0</span> noches</span>
+                    <span id="modal_subtotal_noches">$0.00</span>
+                </div>
+                <?php if ($tarifaLimpieza > 0): ?>
+                <div class="desglose-item">
+                    <span>Tarifa de limpieza</span>
+                    <span>$<?php echo number_format($tarifaLimpieza, 2); ?></span>
+                </div>
+                <?php endif; ?>
+                <div class="desglose-item">
+                    <span>Tarifa de servicio</span>
+                    <span id="modal_tarifa_servicio">$0.00</span>
+                </div>
+                <div class="desglose-total">
+                    <span>Total</span>
+                    <span id="modal_total_reserva">$0.00</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -898,6 +1066,229 @@ function toggleHuespedes() {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         cerrarGaleria();
+        cerrarModalReserva();
+    }
+});
+
+// ==================== FUNCIONES PARA MODAL MÓVIL ====================
+
+// Detectar si es móvil
+function isMobile() {
+    return window.innerWidth <= 767;
+}
+
+// Manejar click en botón reservar
+function handleReservarClick() {
+    if (isMobile()) {
+        // En móvil, abrir modal para completar datos
+        abrirModalReserva();
+    } else {
+        // En desktop, proceder con la reserva
+        iniciarReserva();
+    }
+}
+
+// Abrir modal de reserva móvil
+function abrirModalReserva() {
+    const modal = document.getElementById('modalReservaMovil');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Sincronizar valores del widget principal al modal
+    const fechaLlegada = document.getElementById('fecha_llegada').value;
+    const fechaSalida = document.getElementById('fecha_salida').value;
+    const numHuespedes = document.getElementById('num_huespedes').value;
+    
+    document.getElementById('modal_fecha_llegada').value = fechaLlegada;
+    document.getElementById('modal_fecha_salida').value = fechaSalida;
+    document.getElementById('modal_huespedes_texto').textContent = numHuespedes + ' huésped' + (numHuespedes > 1 ? 'es' : '');
+    
+    // Si hay fechas, verificar disponibilidad
+    if (fechaLlegada && fechaSalida) {
+        verificarYCalcularModal();
+    }
+}
+
+// Cerrar modal de reserva móvil
+function cerrarModalReserva() {
+    const modal = document.getElementById('modalReservaMovil');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('modalReservaMovil');
+    if (e.target === modal) {
+        cerrarModalReserva();
+    }
+});
+
+// Sincronizar fechas entre modal y widget principal
+function sincronizarFechas(tipo) {
+    const modalLlegada = document.getElementById('modal_fecha_llegada');
+    const modalSalida = document.getElementById('modal_fecha_salida');
+    const widgetLlegada = document.getElementById('fecha_llegada');
+    const widgetSalida = document.getElementById('fecha_salida');
+    
+    if (tipo === 'llegada') {
+        widgetLlegada.value = modalLlegada.value;
+        // Ajustar fecha mínima de salida
+        if (modalLlegada.value) {
+            const minSalida = new Date(modalLlegada.value);
+            minSalida.setDate(minSalida.getDate() + 1);
+            modalSalida.min = minSalida.toISOString().split('T')[0];
+            
+            if (modalSalida.value && modalSalida.value <= modalLlegada.value) {
+                modalSalida.value = '';
+                widgetSalida.value = '';
+            }
+        }
+    } else {
+        widgetSalida.value = modalSalida.value;
+    }
+    
+    // Verificar disponibilidad
+    verificarYCalcularModal();
+}
+
+// Verificar disponibilidad desde el modal
+function verificarYCalcularModal() {
+    const fechaLlegada = document.getElementById('modal_fecha_llegada').value;
+    const fechaSalida = document.getElementById('modal_fecha_salida').value;
+    
+    // Sincronizar con widget principal
+    document.getElementById('fecha_llegada').value = fechaLlegada;
+    document.getElementById('fecha_salida').value = fechaSalida;
+    
+    if (!fechaLlegada || !fechaSalida) {
+        ocultarFeedbackModal();
+        document.getElementById('modal-desglose').style.display = 'none';
+        document.getElementById('btnReservarModal').disabled = true;
+        return;
+    }
+    
+    if (new Date(fechaSalida) <= new Date(fechaLlegada)) {
+        mostrarFeedbackModal('La fecha de salida debe ser posterior a la de llegada', 'no-disponible');
+        document.getElementById('modal-desglose').style.display = 'none';
+        document.getElementById('btnReservarModal').disabled = true;
+        return;
+    }
+    
+    // Mostrar loading
+    mostrarFeedbackModal('<i class="fas fa-spinner fa-spin"></i> Verificando disponibilidad...', 'cargando');
+    
+    // Llamar al API
+    fetch(base_url + 'propiedad/verificarDisponibilidad', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: `id_habitacion=${propiedadId}&fecha_inicio=${fechaLlegada}&fecha_fin=${fechaSalida}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.disponible) {
+            mostrarFeedbackModal('<i class="fas fa-check-circle"></i> ' + data.mensaje, 'disponible');
+            document.getElementById('btnReservarModal').disabled = false;
+            document.getElementById('btnReservar').disabled = false;
+            actualizarDesgloseModal(data);
+            // También actualizar el widget principal
+            actualizarDesglose(data);
+        } else {
+            mostrarFeedbackModal('<i class="fas fa-times-circle"></i> ' + data.mensaje, 'no-disponible');
+            document.getElementById('btnReservarModal').disabled = true;
+            document.getElementById('btnReservar').disabled = true;
+            document.getElementById('modal-desglose').style.display = 'none';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        mostrarFeedbackModal('<i class="fas fa-exclamation-triangle"></i> Error al verificar', 'no-disponible');
+        document.getElementById('btnReservarModal').disabled = true;
+    });
+}
+
+// Mostrar feedback en modal
+function mostrarFeedbackModal(mensaje, tipo) {
+    const feedback = document.getElementById('modal-disponibilidad-feedback');
+    const contenido = document.getElementById('modal-feedback-mensaje');
+    
+    feedback.className = 'disponibilidad-feedback ' + tipo;
+    contenido.innerHTML = mensaje;
+    feedback.style.display = 'block';
+}
+
+// Ocultar feedback en modal
+function ocultarFeedbackModal() {
+    document.getElementById('modal-disponibilidad-feedback').style.display = 'none';
+}
+
+// Actualizar desglose en modal
+function actualizarDesgloseModal(data) {
+    document.getElementById('modal_num_noches').textContent = data.noches;
+    document.getElementById('modal_subtotal_noches').textContent = '$' + data.subtotal.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('modal_tarifa_servicio').textContent = '$' + data.tarifa_servicio.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    document.getElementById('modal_total_reserva').textContent = '$' + data.precio_total.toLocaleString('es-MX', {minimumFractionDigits: 2});
+    
+    document.getElementById('modal-desglose').style.display = 'block';
+}
+
+// Toggle huéspedes en modal
+function toggleHuespedesModal() {
+    Swal.fire({
+        title: 'Número de huéspedes',
+        input: 'number',
+        inputValue: document.getElementById('num_huespedes').value,
+        inputAttributes: {
+            min: 1,
+            max: <?php echo $propiedad['capacidad']; ?>
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#FF385C'
+    }).then((result) => {
+        if (result.isConfirmed && result.value) {
+            const num = Math.min(Math.max(1, result.value), <?php echo $propiedad['capacidad']; ?>);
+            document.getElementById('num_huespedes').value = num;
+            document.getElementById('huespedes_texto').textContent = num + ' huésped' + (num > 1 ? 'es' : '');
+            document.getElementById('modal_huespedes_texto').textContent = num + ' huésped' + (num > 1 ? 'es' : '');
+        }
+    });
+}
+
+// Abrir calendario desde el modal (cierra el modal primero)
+function abrirCalendarioDesdeModal() {
+    cerrarModalReserva();
+    setTimeout(() => {
+        abrirCalendarioModal();
+    }, 300);
+}
+
+// Habilitar botón de reserva en móvil al inicio (para abrir modal)
+if (isMobile()) {
+    document.getElementById('btnReservar').disabled = false;
+    document.getElementById('btnReservar').textContent = 'Ver opciones';
+}
+
+// Actualizar al cambiar tamaño de ventana
+window.addEventListener('resize', function() {
+    const btnReservar = document.getElementById('btnReservar');
+    const fechaLlegada = document.getElementById('fecha_llegada').value;
+    const fechaSalida = document.getElementById('fecha_salida').value;
+    
+    if (isMobile()) {
+        btnReservar.disabled = false;
+        btnReservar.textContent = (fechaLlegada && fechaSalida) ? 'Reservar' : 'Ver opciones';
+    } else {
+        btnReservar.textContent = 'Reservar';
+        if (!fechaLlegada || !fechaSalida) {
+            btnReservar.disabled = true;
+        }
     }
 });
 </script>
